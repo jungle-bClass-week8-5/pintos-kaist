@@ -103,7 +103,8 @@ struct thread {
 	/* Table for whole virtual memory owned by thread. */
 	struct supplemental_page_table spt;
 #endif
-
+	// 수정: 언제 깨울지 확인하는 변수
+	int64_t wakeup_tick;
 	/* Owned by thread.c. */
 	//intr_frame은 실행중인 프로세스의 register 정보, stack pointer, instruction counter를 저장하는 자료구조
 	struct intr_frame tf;               /* Information for switching */
@@ -144,4 +145,9 @@ int thread_get_load_avg (void);
 
 void do_iret (struct intr_frame *tf);
 
+/* 수정 추가 함수 */
+void thread_sleep(int64_t ticks);
+void thread_awake(int64_t ticks);
+void update_next_tick_to_awake(int64_t ticks);
+int64_t get_next_tick_to_awake(void);
 #endif /* threads/thread.h */
