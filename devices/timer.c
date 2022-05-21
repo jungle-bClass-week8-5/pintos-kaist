@@ -90,11 +90,13 @@ timer_elapsed (int64_t then) {
 /* Suspends execution for approximately TICKS timer ticks. */
 void
 timer_sleep (int64_t ticks) {
+	// 현제 tick를 받아온다
 	int64_t start = timer_ticks ();
 
 	ASSERT (intr_get_level () == INTR_ON);
+	// 받아온 ticks 변수의 값만큼 시간이 지날때까지 실행
 	while (timer_elapsed (start) < ticks)
-		thread_yield ();
+		thread_yield (); // 
 }
 
 /* Suspends execution for approximately MS milliseconds. */

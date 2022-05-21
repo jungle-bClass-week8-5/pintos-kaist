@@ -198,6 +198,7 @@ list_push_front (struct list *list, struct list_elem *elem) {
 
 /* Inserts ELEM at the end of LIST, so that it becomes the
    back in LIST. */
+// LIST의 맨 뒤에 ELEM을 삽입하여 LIST의 맨 뒤가 되도록 합니다.
 void
 list_push_back (struct list *list, struct list_elem *elem) {
 	list_insert (list_end (list), elem);

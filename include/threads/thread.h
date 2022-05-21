@@ -105,6 +105,7 @@ struct thread {
 #endif
 
 	/* Owned by thread.c. */
+	//intr_frame은 실행중인 프로세스의 register 정보, stack pointer, instruction counter를 저장하는 자료구조
 	struct intr_frame tf;               /* Information for switching */
 	unsigned magic;                     /* Detects stack overflow. */
 };

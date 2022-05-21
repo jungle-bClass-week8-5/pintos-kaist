@@ -79,6 +79,7 @@ msg (const char *format, ...)
    prefixing the output by the name of the test and FAIL:
    and following it with a new-line character,
    and then panics the kernel. */
+// result 파일 내용 작성 부분
 void
 fail (const char *format, ...) 
 {

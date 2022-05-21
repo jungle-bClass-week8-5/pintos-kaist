@@ -46,6 +46,7 @@ sema_init (struct semaphore *sema, unsigned value) {
 	ASSERT (sema != NULL);
 
 	sema->value = value;
+	// 세마포어 대기 리스트
 	list_init (&sema->waiters);
 }
 
@@ -59,6 +60,7 @@ sema_init (struct semaphore *sema, unsigned value) {
    sema_down function. */
 void
 sema_down (struct semaphore *sema) {
+	// 세마포어의 value가 0일 경우 현재 스레드를 blcok 상태로 변경 후 schedule() 호출
 	enum intr_level old_level;
 
 	ASSERT (sema != NULL);
@@ -182,8 +184,10 @@ lock_init (struct lock *lock) {
    interrupt handler.  This function may be called with
    interrupts disabled, but interrupts will be turned back on if
    we need to sleep. */
+	
 void
 lock_acquire (struct lock *lock) {
+	// 다른 프로세스가 접근하지 못하도록 lock을 잠금
 	ASSERT (lock != NULL);
 	ASSERT (!intr_context ());
 	ASSERT (!lock_held_by_current_thread (lock));

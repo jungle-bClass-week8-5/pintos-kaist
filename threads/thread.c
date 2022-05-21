@@ -179,12 +179,14 @@ thread_print_stats (void) {
 tid_t
 thread_create (const char *name, int priority,
 		thread_func *function, void *aux) {
+	// 커널 스레드 == 프로세스
 	struct thread *t;
 	tid_t tid;
 
 	ASSERT (function != NULL);
 
 	/* Allocate thread. */
+	// t에 하나의 페이지 할당 PAL_ZERO-> 모든 페이지 바이트0으로 만듬
 	t = palloc_get_page (PAL_ZERO);
 	if (t == NULL)
 		return TID_ERROR;
@@ -232,6 +234,7 @@ thread_block (void) {
    be important: if the caller had disabled interrupts itself,
    it may expect that it can atomically unblock a thread and
    update other data. */
+	//  block 된것을 ready로 바꾸로 readylist 로 넣어준다.
 void
 thread_unblock (struct thread *t) {
 	enum intr_level old_level;
@@ -294,17 +297,22 @@ thread_exit (void) {
 
 /* Yields the CPU.  The current thread is not put to sleep and
    may be scheduled again immediately at the scheduler's whim. */
+	//  현재 쓰레드가 sleep이 아니면 
 void
 thread_yield (void) {
+	// 현재 실행 중인 쓰레드 구조에 대한 포인터를 얻음
 	struct thread *curr = thread_current ();
 	enum intr_level old_level;
 
 	ASSERT (!intr_context ());
 
-	old_level = intr_disable ();
+	old_level = intr_disable (); //인터럽트 비활성화
 	if (curr != idle_thread)
+		// 리스트에 끝에 넣는다.
 		list_push_back (&ready_list, &curr->elem);
+	//쓰레드의 상태를 ready로 변경하고 스케줄러 실행
 	do_schedule (THREAD_READY);
+	// 인터럽트를 다시 원래 상태로 만듬
 	intr_set_level (old_level);
 }
 
@@ -406,8 +414,11 @@ init_thread (struct thread *t, const char *name, int priority) {
 	memset (t, 0, sizeof *t);
 	t->status = THREAD_BLOCKED;
 	strlcpy (t->name, name, sizeof t->name);
+	// 스레드 sp 위치를 tf.rsp에 저장
 	t->tf.rsp = (uint64_t) t + PGSIZE - sizeof (void *);
+	//스레드 우선순위 초기화
 	t->priority = priority;
+	//스택 오버플로우 감지
 	t->magic = THREAD_MAGIC;
 }
 
@@ -425,6 +436,7 @@ next_thread_to_run (void) {
 }
 
 /* Use iretq to launch the thread */
+// iretq 인터럽트 리턴
 void
 do_iret (struct intr_frame *tf) {
 	__asm __volatile(
@@ -462,6 +474,10 @@ do_iret (struct intr_frame *tf) {
    It's not safe to call printf() until the thread switch is
    complete.  In practice that means that printf()s should be
    added at the end of the function. */
+
+// 새 스레드의 페이지 테이블을 활성화하여 스레드를 전환하고 이전 스레드가 죽으면 소멸합니다.
+// 이 함수를 호출할 때 PREV 스레드에서 방금 전환했고 새 스레드는 이미 실행 중이며 인터럽트는 여전히 비활성화되어 있습니다.
+// 스레드 전환이 완료될 때까지 printf()를 호출하는 것은 안전하지 않습니다. 실제로는 printf()가 함수 끝에 추가되어야 함을 의미합니다.
 static void
 thread_launch (struct thread *th) {
 	uint64_t tf_cur = (uint64_t) &running_thread ()->tf;
@@ -556,7 +572,7 @@ schedule (void) {
 	/* Activate the new address space. */
 	process_activate (next);
 #endif
-
+	// 현재스레드와 다음 스레드가 같지 않다.
 	if (curr != next) {
 		/* If the thread we switched from is dying, destroy its struct
 		   thread. This must happen late so that thread_exit() doesn't
@@ -572,6 +588,7 @@ schedule (void) {
 
 		/* Before switching the thread, we first save the information
 		 * of current running. */
+		// 스레드 전환 전 현재 실행 중인 정보를 저장 -> PCB 저장 부분???
 		thread_launch (next);
 	}
 }
@@ -582,6 +599,7 @@ allocate_tid (void) {
 	static tid_t next_tid = 1;
 	tid_t tid;
 
+	// tid를 만들 때 겹치지 않도록 lock을 만들고 tid를 만들고 풀어서 tid 리턴
 	lock_acquire (&tid_lock);
 	tid = next_tid++;
 	lock_release (&tid_lock);
