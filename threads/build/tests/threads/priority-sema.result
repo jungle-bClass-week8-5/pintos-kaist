@@ -1,9 +1,49 @@
 FAIL
-Kernel panic in run: PANIC at ../../tests/threads/tests.c:60 in run_test(): no test named "priority-sema"
-Call stack: 0x800421349f 0x800421694d 0x8004206678 0x80042067c5 0x8004206162
-Translation of call stack:
-0x000000800421349f: debug_panic (lib/kernel/debug.c:32)
-0x000000800421694d: run_test (tests/threads/tests.c:61)
-0x0000008004206678: run_task (threads/init.c:255)
-0x00000080042067c5: run_actions (threads/init.c:300)
-0x0000008004206162: main (threads/init.c:128)
+Test output failed to match any acceptable form.
+
+Acceptable output:
+  (priority-sema) begin
+  (priority-sema) Thread priority 30 woke up.
+  (priority-sema) Back in main thread.
+  (priority-sema) Thread priority 29 woke up.
+  (priority-sema) Back in main thread.
+  (priority-sema) Thread priority 28 woke up.
+  (priority-sema) Back in main thread.
+  (priority-sema) Thread priority 27 woke up.
+  (priority-sema) Back in main thread.
+  (priority-sema) Thread priority 26 woke up.
+  (priority-sema) Back in main thread.
+  (priority-sema) Thread priority 25 woke up.
+  (priority-sema) Back in main thread.
+  (priority-sema) Thread priority 24 woke up.
+  (priority-sema) Back in main thread.
+  (priority-sema) Thread priority 23 woke up.
+  (priority-sema) Back in main thread.
+  (priority-sema) Thread priority 22 woke up.
+  (priority-sema) Back in main thread.
+  (priority-sema) Thread priority 21 woke up.
+  (priority-sema) Back in main thread.
+  (priority-sema) end
+Differences in `diff -u' format:
+  (priority-sema) begin
+- (priority-sema) Thread priority 30 woke up.
+  (priority-sema) Back in main thread.
+- (priority-sema) Thread priority 29 woke up.
+  (priority-sema) Back in main thread.
+- (priority-sema) Thread priority 28 woke up.
+  (priority-sema) Back in main thread.
+- (priority-sema) Thread priority 27 woke up.
+  (priority-sema) Back in main thread.
+- (priority-sema) Thread priority 26 woke up.
+  (priority-sema) Back in main thread.
+- (priority-sema) Thread priority 25 woke up.
+  (priority-sema) Back in main thread.
+- (priority-sema) Thread priority 24 woke up.
+  (priority-sema) Back in main thread.
+- (priority-sema) Thread priority 23 woke up.
+  (priority-sema) Back in main thread.
+- (priority-sema) Thread priority 22 woke up.
+  (priority-sema) Back in main thread.
+- (priority-sema) Thread priority 21 woke up.
+  (priority-sema) Back in main thread.
+  (priority-sema) end

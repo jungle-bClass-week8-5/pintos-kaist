@@ -7,14 +7,15 @@ Kernel command line: -q run priority-donate-sema
 Pintos booting with: 
 	base_mem: 0x0 ~ 0x9fc00 (Usable: 639 kB)
 	ext_mem: 0x100000 ~ 0x13e0000 (Usable: 19,328 kB)
-Calibrating timer...  104,755,200 loops/s.
+Calibrating timer...  154,009,600 loops/s.
 Boot complete.
 Executing 'priority-donate-sema':
-Kernel PANIC at ../../tests/threads/tests.c:60 in run_test(): no test named "priority-donate-sema"
-Call stack: 0x800421349f 0x800421694d 0x8004206678 0x80042067c5 0x8004206162.
-The `backtrace' program can make call stacks useful.
-Read "Backtraces" in the "Debugging Tools" chapter
-of the Pintos documentation for more information.
-Timer: 20 ticks
-Thread: 0 idle ticks, 20 kernel ticks, 0 user ticks
-Console: 
+(priority-donate-sema) begin
+(priority-donate-sema) Main thread finished.
+(priority-donate-sema) end
+Execution of 'priority-donate-sema' complete.
+Timer: 27 ticks
+Thread: 0 idle ticks, 27 kernel ticks, 0 user ticks
+Console: 502 characters output
+Keyboard: 0 keys pressed
+Powering off...

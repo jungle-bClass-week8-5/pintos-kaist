@@ -1,12 +1,1 @@
-FAIL
-Kernel panic in run: PANIC at ../../tests/threads/tests.c:94 in fail(): test failed
-Call stack: 0x800421349f 0x8004216aa1 0x8004216ff2 0x8004216aed 0x80042168db 0x8004206678 0x80042067c5 0x8004206162
-Translation of call stack:
-0x000000800421349f: debug_panic (lib/kernel/debug.c:32)
-0x0000008004216aa1: pass (tests/threads/tests.c:100)
-0x0000008004216ff2: test_sleep (tests/threads/alarm-wait.c:126 (discriminator 2))
-0x0000008004216aed: test_alarm_single (tests/threads/alarm-wait.c:19)
-0x00000080042168db: run_test (tests/threads/tests.c:57)
-0x0000008004206678: run_task (threads/init.c:255)
-0x00000080042067c5: run_actions (threads/init.c:300)
-0x0000008004206162: main (threads/init.c:128)
+PASS

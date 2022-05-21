@@ -97,12 +97,7 @@ timer_sleep (int64_t ticks) {
 	int64_t start = timer_ticks ();
 
 	ASSERT (intr_get_level () == INTR_ON);
-	// 받아온 ticks 변수의 값만큼 시간이 지날때까지 실행
-	// while (timer_elapsed (start) < ticks)
-	// 	thread_yield (); // 
-	/*
-		스레드를 양보한다.
-	*/
+
 	thread_sleep(start+ticks);
 }
 
@@ -136,13 +131,10 @@ timer_interrupt (struct intr_frame *args UNUSED) {
 	ticks++;
 	thread_tick ();
 
-	// 수정 현재 틱과 비교
-	int64_t curr_ticks = timer_ticks();
-	// printf("-----curr_ticks: %d, min_wake_ticks:%d\n",curr_ticks, min_wake_ticks);
-	if(curr_ticks == get_next_tick_to_awake()){
+	if(ticks >= get_next_tick_to_awake()){
 		// 스레드를 깨워라 sleep_list를 뒤져라
-		// printf("awake: 444444444444444444444\n");
-		thread_awake(curr_ticks);
+		printf("---------awake:\n");
+		thread_awake(ticks);
 	}
 }
 

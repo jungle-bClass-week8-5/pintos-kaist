@@ -77,7 +77,7 @@ void update_next_tick_to_awake();
 // /* 최소 tick값을 반환 */
 int64_t get_next_tick_to_awake(void);
 
-int64_t next_tick_to_awake;
+static long long next_tick_to_awake;
 
 /* Returns true if T appears to point to a valid thread. */
 #define is_thread(t) ((t) != NULL && (t)->magic == THREAD_MAGIC)
@@ -126,7 +126,10 @@ thread_init (void) {
 	lock_init (&tid_lock);
 	list_init (&ready_list);
 	list_init (&destruction_req);
+
+	// 수정: 추가 init
 	list_init (&sleep_list);
+	next_tick_to_awake = INT64_MAX;
 
 	/* Set up a thread structure for the running thread. */
 	initial_thread = running_thread ();
@@ -631,55 +634,49 @@ allocate_tid (void) {
 
 // 수정 추가 함수
 void thread_sleep(int64_t ticks){
-	// printf("2222222222222\n");
+
 	struct thread *curr = thread_current ();
 	enum intr_level old_level;
 
 	ASSERT (!intr_context ());
 
 	old_level = intr_disable(); //인터럽트 비활성화
-	// printf("old_level$$$$$$$$\n");
-	if (curr != idle_thread)
-		// sleep리스트에 끝에 넣는다.
-		// 현재쓰레드 block
-		// curr->status = THREAD_BLOCKED;
-		curr->wakeup_tick = ticks;
+	curr->wakeup_tick = ticks;
+	if (curr != idle_thread){
 		list_push_back (&sleep_list, &curr->elem);
-
-	//쓰레드의 상태를 ready로 변경하고 스케줄러 실행
-	// do_schedule (THREAD_BLOCKED);
+	}
 	
-	// 인터럽트를 다시 원래 상태로 만듬
-	// schedule();
-	// printf("3333333333333333\n");
+	update_next_tick_to_awake(ticks);
+	do_schedule(THREAD_BLOCKED);
 	intr_set_level (old_level);
 }
 
 void thread_awake(int64_t ticks){
-	// enum intr_level old_level;
-	// old_level = intr_disable (); //인터럽트 비활성화
-	// printf("5555555555555555\n");
+	next_tick_to_awake = INT64_MAX;
+
 	struct list_elem *curr_thread_list = list_begin(&sleep_list);
 	struct thread *curr_thread;
 
-	while(curr_thread_list){
-		// printf("66666666666666\n");
+	while(curr_thread_list != list_end(&sleep_list)){
+		enum intr_level old_level;
 		curr_thread = list_entry (curr_thread_list, struct thread, elem);
+
 		if(curr_thread->wakeup_tick <= ticks){
-			// 깨워라
-			// 캐울준비
-			curr_thread->wakeup_tick = 0;
+			old_level = intr_disable();
 			curr_thread->status = THREAD_READY;
 
 			struct list_elem * next_list = list_remove(curr_thread_list);
 
 			list_push_back(&ready_list, &curr_thread->elem);
 			curr_thread_list = next_list;
+			
+			intr_set_level(old_level);
 		}else{
 			// 다음꺼를 탐색해라
 			curr_thread_list = curr_thread_list->next;
 		}
 	}
+	update_next_tick_to_awake();
 	// intr_set_level (old_level);
 }
 
