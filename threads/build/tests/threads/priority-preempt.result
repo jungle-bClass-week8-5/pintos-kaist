@@ -1,0 +1,9 @@
+FAIL
+Kernel panic in run: PANIC at ../../tests/threads/tests.c:60 in run_test(): no test named "priority-preempt"
+Call stack: 0x800421349f 0x800421694d 0x8004206678 0x80042067c5 0x8004206162
+Translation of call stack:
+0x000000800421349f: debug_panic (lib/kernel/debug.c:32)
+0x000000800421694d: run_test (tests/threads/tests.c:61)
+0x0000008004206678: run_task (threads/init.c:255)
+0x00000080042067c5: run_actions (threads/init.c:300)
+0x0000008004206162: main (threads/init.c:128)

@@ -25,7 +25,7 @@ static int64_t ticks;
 static unsigned loops_per_tick;
 
 // 수정: 깨워야할 스레드의 최소 tick
-int64_t min_wake_ticks;
+
 
 static intr_handler_func timer_interrupt;
 static bool too_many_loops (unsigned loops);
@@ -40,7 +40,6 @@ timer_init (void) {
 	/* 8254 input frequency divided by TIMER_FREQ, rounded to
 	   nearest. */
 	uint16_t count = (1193180 + TIMER_FREQ / 2) / TIMER_FREQ;
-	min_wake_ticks = 0;
 
 	outb (0x43, 0x34);    /* CW: counter 0, LSB then MSB, mode 2, binary. */
 	outb (0x40, count & 0xff);
@@ -104,11 +103,7 @@ timer_sleep (int64_t ticks) {
 	/*
 		스레드를 양보한다.
 	*/
-	printf("1111111111111\n");
-	if(min_wake_ticks == 0) min_wake_ticks = start+ticks;
-	printf("@@@@@@@@@@min_wake_ticks:%d\n", min_wake_ticks);
 	thread_sleep(start+ticks);
-
 }
 
 /* Suspends execution for approximately MS milliseconds. */
@@ -143,12 +138,11 @@ timer_interrupt (struct intr_frame *args UNUSED) {
 
 	// 수정 현재 틱과 비교
 	int64_t curr_ticks = timer_ticks();
-	printf("-----curr_ticks: %d, min_wake_ticks:%d\n",curr_ticks, min_wake_ticks);
-	if(curr_ticks == min_wake_ticks){
+	// printf("-----curr_ticks: %d, min_wake_ticks:%d\n",curr_ticks, min_wake_ticks);
+	if(curr_ticks == get_next_tick_to_awake()){
 		// 스레드를 깨워라 sleep_list를 뒤져라
-		printf("awake: 444444444444444444444\n");
+		// printf("awake: 444444444444444444444\n");
 		thread_awake(curr_ticks);
-		min_wake_ticks = get_next_tick_to_awake();
 	}
 }
 
