@@ -10,17 +10,11 @@ Pintos booting with:
 Calibrating timer...  157,081,600 loops/s.
 Boot complete.
 Executing 'priority-donate-chain':
-(priority-donate-chain) begin
-(priority-donate-chain) main got lock.
-(priority-donate-chain) main should have priority 3.  Actual priority: 0.
-(priority-donate-chain) main should have priority 6.  Actual priority: 0.
-(priority-donate-chain) main should have priority 9.  Actual priority: 0.
-(priority-donate-chain) main should have priority 12.  Actual priority: 0.
-(priority-donate-chain) main should have priority 15.  Actual priority: 0.
-(priority-donate-chain) main should have priority 18.  Actual priority: 0.
-(priority-donate-chain) main should have priority 21.  Actual priority: 0.
-(priority-donate-chain) main finishing with priority 0.
-(priority-donate-chain) end
-Execution of 'priority-donate-chain' complete.
-Timer: 27 ticks
-Thread
+Kernel PANIC at ../../tests/threads/tests.c:60 in run_test(): no test named "priority-donate-chain"
+Call stack: 0x80042134ab 0x8004216959 0x8004206678 0x80042067c5 0x8004206162.
+The `backtrace' program can make call stacks useful.
+Read "Backtraces" in the "Debugging Tools" chapter
+of the Pintos documentation for more information.
+Timer: 23 ticks
+Thread: 0 idle ticks, 23 kernel ticks, 0 user ticks
+Console: 

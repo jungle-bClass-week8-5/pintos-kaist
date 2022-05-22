@@ -11,12 +11,11 @@ Calibrating timer...  157,081,600 loops/s.
 Boot complete.
 Executing 'alarm-negative':
 (alarm-negative) begin
----------awake:
 (alarm-negative) PASS
 (alarm-negative) end
 Execution of 'alarm-negative' complete.
 Timer: 24 ticks
 Thread: 1 idle ticks, 23 kernel ticks, 0 user ticks
-Console: 465 characters output
+Console: 449 characters output
 Keyboard: 0 keys pressed
 Powering off...

@@ -1,9 +1,9 @@
 pass tests/threads/alarm-single
 pass tests/threads/alarm-multiple
-FAIL tests/threads/alarm-simultaneous
+pass tests/threads/alarm-simultaneous
 FAIL tests/threads/alarm-priority
-FAIL tests/threads/alarm-zero
-FAIL tests/threads/alarm-negative
+pass tests/threads/alarm-zero
+pass tests/threads/alarm-negative
 FAIL tests/threads/priority-change
 FAIL tests/threads/priority-donate-one
 FAIL tests/threads/priority-donate-multiple

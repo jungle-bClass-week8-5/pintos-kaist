@@ -11,7 +11,6 @@ Calibrating timer...  104,755,200 loops/s.
 Boot complete.
 Executing 'alarm-priority':
 (alarm-priority) begin
----------awake:
 (alarm-priority) Thread priority 25 woke up.
 (alarm-priority) Thread priority 24 woke up.
 (alarm-priority) Thread priority 23 woke up.
@@ -24,8 +23,8 @@ Executing 'alarm-priority':
 (alarm-priority) Thread priority 26 woke up.
 (alarm-priority) end
 Execution of 'alarm-priority' complete.
-Timer: 523 ticks
-Thread: 490 idle ticks, 33 kernel ticks, 0 user ticks
-Console: 896 characters output
+Timer: 522 ticks
+Thread: 490 idle ticks, 32 kernel ticks, 0 user ticks
+Console: 880 characters output
 Keyboard: 0 keys pressed
 Powering off...

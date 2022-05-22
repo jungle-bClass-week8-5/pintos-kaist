@@ -1,32 +1,9 @@
 FAIL
-Test output failed to match any acceptable form.
-
-Acceptable output:
-  (priority-donate-nest) begin
-  (priority-donate-nest) Low thread should have priority 32.  Actual priority: 32.
-  (priority-donate-nest) Low thread should have priority 33.  Actual priority: 33.
-  (priority-donate-nest) Medium thread should have priority 33.  Actual priority: 33.
-  (priority-donate-nest) Medium thread got the lock.
-  (priority-donate-nest) High thread got the lock.
-  (priority-donate-nest) High thread finished.
-  (priority-donate-nest) High thread should have just finished.
-  (priority-donate-nest) Middle thread finished.
-  (priority-donate-nest) Medium thread should just have finished.
-  (priority-donate-nest) Low thread should have priority 31.  Actual priority: 31.
-  (priority-donate-nest) end
-Differences in `diff -u' format:
-  (priority-donate-nest) begin
-- (priority-donate-nest) Low thread should have priority 32.  Actual priority: 32.
-- (priority-donate-nest) Low thread should have priority 33.  Actual priority: 33.
-- (priority-donate-nest) Medium thread should have priority 33.  Actual priority: 33.
-+ (priority-donate-nest) Low thread should have priority 32.  Actual priority: 31.
-+ (priority-donate-nest) Low thread should have priority 33.  Actual priority: 31.
-+ (priority-donate-nest) Medium thread should have priority 33.  Actual priority: 32.
-  (priority-donate-nest) Medium thread got the lock.
-- (priority-donate-nest) High thread got the lock.
-- (priority-donate-nest) High thread finished.
-- (priority-donate-nest) High thread should have just finished.
-- (priority-donate-nest) Middle thread finished.
-  (priority-donate-nest) Medium thread should just have finished.
-  (priority-donate-nest) Low thread should have priority 31.  Actual priority: 31.
-  (priority-donate-nest) end
+Kernel panic in run: PANIC at ../../tests/threads/tests.c:60 in run_test(): no test named "priority-donate-nest"
+Call stack: 0x80042134ab 0x8004216959 0x8004206678 0x80042067c5 0x8004206162
+Translation of call stack:
+0x00000080042134ab: debug_panic (lib/kernel/debug.c:32)
+0x0000008004216959: run_test (tests/threads/tests.c:61)
+0x0000008004206678: run_task (threads/init.c:255)
+0x00000080042067c5: run_actions (threads/init.c:300)
+0x0000008004206162: main (threads/init.c:128)

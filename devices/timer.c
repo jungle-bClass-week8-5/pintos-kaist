@@ -124,7 +124,7 @@ void
 timer_print_stats (void) {
 	printf ("Timer: %"PRId64" ticks\n", timer_ticks ());
 }
-
+
 /* Timer interrupt handler. */
 static void
 timer_interrupt (struct intr_frame *args UNUSED) {
@@ -133,7 +133,6 @@ timer_interrupt (struct intr_frame *args UNUSED) {
 
 	if(ticks >= get_next_tick_to_awake()){
 		// 스레드를 깨워라 sleep_list를 뒤져라
-		printf("---------awake:\n");
 		thread_awake(ticks);
 	}
 }

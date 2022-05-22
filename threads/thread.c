@@ -642,11 +642,12 @@ void thread_sleep(int64_t ticks){
 
 	old_level = intr_disable(); //인터럽트 비활성화
 	curr->wakeup_tick = ticks;
+
 	if (curr != idle_thread){
 		list_push_back (&sleep_list, &curr->elem);
 	}
 	
-	update_next_tick_to_awake(ticks);
+	update_next_tick_to_awake();
 	do_schedule(THREAD_BLOCKED);
 	intr_set_level (old_level);
 }
@@ -662,15 +663,15 @@ void thread_awake(int64_t ticks){
 		curr_thread = list_entry (curr_thread_list, struct thread, elem);
 
 		if(curr_thread->wakeup_tick <= ticks){
-			old_level = intr_disable();
-			curr_thread->status = THREAD_READY;
+			// old_level = intr_disable();
+			// curr_thread->status = THREAD_READY;
 
 			struct list_elem * next_list = list_remove(curr_thread_list);
-
-			list_push_back(&ready_list, &curr_thread->elem);
+			thread_unblock(curr_thread);
+			// list_push_back(&ready_list, &curr_thread->elem);
 			curr_thread_list = next_list;
 			
-			intr_set_level(old_level);
+			// intr_set_level(old_level);
 		}else{
 			// 다음꺼를 탐색해라
 			curr_thread_list = curr_thread_list->next;
