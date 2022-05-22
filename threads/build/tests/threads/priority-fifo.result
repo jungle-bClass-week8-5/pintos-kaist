@@ -1,9 +1,13 @@
 FAIL
-Kernel panic in run: PANIC at ../../tests/threads/tests.c:60 in run_test(): no test named "priority-fifo"
-Call stack: 0x80042134ab 0x8004216959 0x8004206678 0x80042067c5 0x8004206162
+Kernel panic in run: PANIC at ../../lib/kernel/list.c:286 in list_front(): assertion `!list_empty(list)' failed.
+Call stack: 0x80042135b2 0x8004213f14 0x8004207b6e 0x800420713c 0x8004218d8f 0x80042169ee 0x8004206678 0x80042067c5 0x8004206162
 Translation of call stack:
-0x00000080042134ab: debug_panic (lib/kernel/debug.c:32)
-0x0000008004216959: run_test (tests/threads/tests.c:61)
+0x00000080042135b2: debug_panic (lib/kernel/debug.c:32)
+0x0000008004213f14: list_front (lib/kernel/list.c:287)
+0x0000008004207b6e: test_max_priority (threads/thread.c:751)
+0x000000800420713c: thread_set_priority (threads/thread.c:360)
+0x0000008004218d8f: test_priority_fifo (tests/threads/priority-fifo.c:54)
+0x00000080042169ee: run_test (tests/threads/tests.c:56)
 0x0000008004206678: run_task (threads/init.c:255)
 0x00000080042067c5: run_actions (threads/init.c:300)
 0x0000008004206162: main (threads/init.c:128)

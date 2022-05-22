@@ -10,11 +10,14 @@ Pintos booting with:
 Calibrating timer...  157,081,600 loops/s.
 Boot complete.
 Executing 'priority-fifo':
-Kernel PANIC at ../../tests/threads/tests.c:60 in run_test(): no test named "priority-fifo"
-Call stack: 0x80042134ab 0x8004216959 0x8004206678 0x80042067c5 0x8004206162.
+(priority-fifo) begin
+(priority-fifo) 16 threads will iterate 16 times in the same order each time.
+(priority-fifo) If the order varies then there is a bug.
+Kernel PANIC at ../../lib/kernel/list.c:286 in list_front(): assertion `!list_empty(list)' failed.
+Call stack: 0x80042135b2 0x8004213f14 0x8004207b6e 0x800420713c 0x8004218d8f 0x80042169ee 0x8004206678 0x80042067c5 0x8004206162.
 The `backtrace' program can make call stacks useful.
 Read "Backtraces" in the "Debugging Tools" chapter
 of the Pintos documentation for more information.
-Timer: 23 ticks
-Thread: 0 idle ticks, 23 kernel ticks, 0 user ticks
+Timer: 24 ticks
+Thread: 0 idle ticks, 24 kernel ticks, 0 user ticks
 Console: 
