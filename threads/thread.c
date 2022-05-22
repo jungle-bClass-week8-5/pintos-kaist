@@ -748,8 +748,12 @@ int64_t get_next_tick_to_awake(void)
 /* 추가함수 :우선순위 */
 void test_max_priority(void)
 {
-	struct thread *most_priority_thread = list_entry(list_front(&ready_list), struct thread, elem); // elem에 대한 thread를 가져다줌
 	struct thread *curr_thread = thread_current();
+	struct thread *most_priority_thread = curr_thread;
+	if (!list_empty(&ready_list))
+	{
+		most_priority_thread= list_entry(list_front(&ready_list), struct thread, elem); // elem에 대한 thread를 가져다줌
+	}
 
 	if (most_priority_thread->priority > curr_thread->priority)
 	{
