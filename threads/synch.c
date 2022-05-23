@@ -118,13 +118,15 @@ void sema_up(struct semaphore *sema)
 	if (!list_empty(&sema->waiters))
 	{
 		// 수정 : 세마포어 - 애매
-		list_sort(&sema->waiters, cmp_sem_priority, NULL);
+		list_sort(&sema->waiters, cmp_priority, NULL);
+
 		thread_unblock(list_entry(list_pop_front(&sema->waiters),
 								  struct thread, elem));
 	}
 	sema->value++;
 	//수정 : 세마포어
-	thread_yield();
+	// thread_yield();
+	test_max_priority();
 	intr_set_level(old_level);
 }
 
@@ -301,6 +303,7 @@ void cond_wait(struct condition *cond, struct lock *lock)
 	// list_push_back(&cond->waiters, &waiter.elem);
 	list_insert_ordered(&cond->waiters, &waiter.elem, cmp_sem_priority, NULL);
 	lock_release(lock);
+	
 	sema_down(&waiter.semaphore);
 	lock_acquire(lock);
 }
@@ -344,11 +347,19 @@ void cond_broadcast(struct condition *cond, struct lock *lock)
 		cond_signal(cond, lock);
 }
 
+// list_elem = semaphore_elem->elem
+// &waiter.elem 은 list_elem 구조체이다.
 bool cmp_sem_priority(const struct list_elem *a, const struct list_elem *b, void *aux UNUSED)
 {
-	struct thread *a_thread = list_entry(a, struct thread, elem);
-	struct thread *b_thread = list_entry(b, struct thread, elem);
+	// sema->w 에서 thread 찾기
+	// list_entry(list_front(&sema->waiters),struct thread, elem)
+	
+	struct semaphore *a_sema = &list_entry(a,struct semaphore_elem, elem)->semaphore;
+	struct semaphore *b_sema = &list_entry(b,struct semaphore_elem, elem)->semaphore;
 
+	struct thread *a_thread = list_entry(list_begin(&a_sema->waiters), struct thread, elem);
+	struct thread *b_thread = list_entry(list_begin(&b_sema->waiters), struct thread, elem);
+	
 	if (a_thread->priority > b_thread->priority)
 	{
 		return 1;
