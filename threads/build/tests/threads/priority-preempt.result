@@ -1,1 +1,10 @@
-PASS
+FAIL
+Kernel panic in run: PANIC at ../../tests/threads/priority-preempt.c:24 in test_priority_preempt(): assertion `thread_get_priority () == PRI_DEFAULT' failed.
+Call stack: 0x8004213a47 0x80042195bc 0x8004216e83 0x8004206678 0x80042067c5 0x8004206162
+Translation of call stack:
+0x0000008004213a47: debug_panic (lib/kernel/debug.c:32)
+0x00000080042195bc: test_priority_preempt (tests/threads/priority-preempt.c:26)
+0x0000008004216e83: run_test (tests/threads/tests.c:56)
+0x0000008004206678: run_task (threads/init.c:255)
+0x00000080042067c5: run_actions (threads/init.c:300)
+0x0000008004206162: main (threads/init.c:128)

@@ -1,9 +1,19 @@
 FAIL
-Kernel panic in run: PANIC at ../../tests/threads/tests.c:59 in run_test(): no test named "priority-change"
-Call stack: 0x80042136e5 0x8004216b93 0x8004206678 0x80042067c5 0x8004206162
-Translation of call stack:
-0x00000080042136e5: debug_panic (lib/kernel/debug.c:32)
-0x0000008004216b93: run_test (tests/threads/tests.c:60)
-0x0000008004206678: run_task (threads/init.c:255)
-0x00000080042067c5: run_actions (threads/init.c:300)
-0x0000008004206162: main (threads/init.c:128)
+Test output failed to match any acceptable form.
+
+Acceptable output:
+  (priority-change) begin
+  (priority-change) Creating a high-priority thread 2.
+  (priority-change) Thread 2 now lowering priority.
+  (priority-change) Thread 2 should have just lowered its priority.
+  (priority-change) Thread 2 exiting.
+  (priority-change) Thread 2 should have just exited.
+  (priority-change) end
+Differences in `diff -u' format:
+  (priority-change) begin
+  (priority-change) Creating a high-priority thread 2.
+- (priority-change) Thread 2 now lowering priority.
+  (priority-change) Thread 2 should have just lowered its priority.
+- (priority-change) Thread 2 exiting.
+  (priority-change) Thread 2 should have just exited.
+  (priority-change) end
