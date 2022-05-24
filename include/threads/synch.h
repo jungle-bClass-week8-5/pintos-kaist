@@ -43,6 +43,12 @@ void cond_broadcast(struct condition *, struct lock *);
 
 // 추가 : 동기화
 bool cmp_sem_priority(const struct list_elem *a, const struct list_elem *b, void *aux);
+
+// 추가 : donation
+void remove_with_lock(struct lock *lock);
+void refresh_priority(void);
+bool cmp_donation_priority(const struct list_elem *a, const struct list_elem *b, void *aux);
+
 /* Optimization barrier.
  *
  * The compiler will not reorder operations across an

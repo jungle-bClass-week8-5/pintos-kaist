@@ -13,20 +13,20 @@
 enum thread_status
 {
 	THREAD_RUNNING, /* Running thread. */
-	THREAD_READY,	/* Not running but ready to run. */
+	THREAD_READY,		/* Not running but ready to run. */
 	THREAD_BLOCKED, /* Waiting for an event to trigger. */
-	THREAD_DYING	/* About to be destroyed. */
+	THREAD_DYING		/* About to be destroyed. */
 };
 
 /* Thread identifier type.
-   You can redefine this to whatever type you like. */
+	 You can redefine this to whatever type you like. */
 typedef int tid_t;
 #define TID_ERROR ((tid_t)-1) /* Error value for tid_t. */
 
 /* Thread priorities. */
-#define PRI_MIN 0	   /* Lowest priority. */
+#define PRI_MIN 0			 /* Lowest priority. */
 #define PRI_DEFAULT 31 /* Default priority. */
-#define PRI_MAX 63	   /* Highest priority. */
+#define PRI_MAX 63		 /* Highest priority. */
 
 /* A kernel thread or user process.
  *
@@ -85,13 +85,21 @@ typedef int tid_t;
  * only because they are mutually exclusive: only a thread in the
  * ready state is on the run queue, whereas only a thread in the
  * blocked state is on a semaphore wait list. */
+
 struct thread
 {
 	/* Owned by thread.c. */
-	tid_t tid;				   /* Thread identifier. */
+	tid_t tid;								 /* Thread identifier. */
 	enum thread_status status; /* Thread state. */
-	char name[16];			   /* Name (for debugging purposes). */
-	int priority;			   /* Priority. */
+	char name[16];						 /* Name (for debugging purposes). */
+	int priority;							 /* Priority. */
+	// 추가: donation
+	// 초기 우선순위 저장 필드
+	int init_priority;
+	// 해당 쓰레드가 대기하고 있는 lock자료구조
+	struct lock *wait_on_lock;
+	struct list_elem d_elem; /* List element. */
+	struct list donations;
 
 	/* Shared between thread.c and synch.c. */
 	struct list_elem elem; /* List element. */
@@ -109,12 +117,12 @@ struct thread
 	/* Owned by thread.c. */
 	// intr_frame은 실행중인 프로세스의 register 정보, stack pointer, instruction counter를 저장하는 자료구조
 	struct intr_frame tf; /* Information for switching */
-	unsigned magic;		  /* Detects stack overflow. */
+	unsigned magic;				/* Detects stack overflow. */
 };
 
 /* If false (default), use round-robin scheduler.
-   If true, use multi-level feedback queue scheduler.
-   Controlled by kernel command-line option "-o mlfqs". */
+	 If true, use multi-level feedback queue scheduler.
+	 Controlled by kernel command-line option "-o mlfqs". */
 extern bool thread_mlfqs;
 
 void thread_init(void);
@@ -156,4 +164,8 @@ int64_t get_next_tick_to_awake(void);
 void test_max_priority(void);
 bool cmp_priority(const struct list_elem *a, const struct list_elem *b, void *aux UNUSED);
 
+// 수정 추가함수 : donation
+void donate_priority(void);
+void remove_with_lock(struct lock *lock);
+void refresh_priority(void);
 #endif /* threads/thread.h */

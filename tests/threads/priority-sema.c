@@ -28,12 +28,14 @@ test_priority_sema (void)
       char name[16];
       snprintf (name, sizeof name, "priority %d", priority);
       thread_create (name, priority, priority_sema_thread, NULL);
+      // printf("11create_thread_current %d\n", thread_current()->tid);
     }
 
   for (i = 0; i < 10; i++) 
     {
       sema_up (&sema);
-      msg ("Back in main thread."); 
+      msg ("Back in main thread.");
+      // printf("22back_thread_current %d\n", thread_current()->tid);
     }
 }
 
