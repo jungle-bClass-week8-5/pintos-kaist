@@ -359,8 +359,12 @@ void thread_set_priority(int new_priority)
 {
 	// 수정: 우선순위
 	thread_current()->priority = new_priority;
+	thread_current()->init_priority = new_priority;
 
 	refresh_priority();
+
+	donate_priority();
+
 	test_max_priority();
 }
 
@@ -785,29 +789,28 @@ bool cmp_priority(const struct list_elem *a, const struct list_elem *b, void *au
 // 우선순위가 높은 thread의 우선순위를 lock에 있는 thread들에게 기부
 void donate_priority()
 {
-	int depth;
-	struct thread *cur = thread_current();
+	// int depth;
+	// struct thread *cur = thread_current();
 
-	for (depth = 0; depth < 8; depth++)
-	{
-		if (!cur->wait_on_lock) // 기다리는 lock이 없다면 종료
-			break;
-		struct thread *holder = cur->wait_on_lock->holder;
-		holder->priority = cur->priority;
-		cur = holder;
-	}
-	// struct thread *curr = thread_current();
-	// // lock을 잠군 thread
-	// struct thread *lock_t = curr->wait_on_lock->holder;
-
-	// if (curr->priority > lock_t->priority)
+	// for (depth = 0; depth < 8; depth++)
 	// {
-	// 	int i = 0;
-	// 	while (lock_t->wait_on_lock != NULL && i < 9)
-	// 	{
-	// 		lock_t->priority = curr->priority;
-	// 		lock_t = lock_t->wait_on_lock->holder;
-	// 		i++;
-	// 	}
+	// 	if (!cur->wait_on_lock) // 기다리는 lock이 없다면 종료
+	// 		break;
+	// 	struct thread *holder = cur->wait_on_lock->holder;
+	// 	holder->priority = cur->priority;
+	// 	cur = holder;
 	// }
+
+	// lock을 잠군 thread
+	// struct thread *lock_t = curr->wait_on_lock->holder;
+	struct thread *curr = thread_current();
+	int i = 0;
+	while (curr->wait_on_lock != NULL && i < 8)
+	{
+		struct thread *lock_t = curr->wait_on_lock->holder;
+
+		lock_t->priority = curr->priority;
+		curr = lock_t;
+		i++;
+	}
 }
