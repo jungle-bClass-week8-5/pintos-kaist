@@ -130,7 +130,19 @@ static void
 timer_interrupt (struct intr_frame *args UNUSED) {
 	ticks++;
 	thread_tick ();
-
+	if (thread_mlfqs)
+	{
+		mlfqs_increment();
+		if (ticks % 4 == 0)
+		{
+			mlfqs_recalculate_priority();
+			if (ticks % TIMER_FREQ == 0)
+			{
+				mlfqs_recalc();
+				mlfqs_load_avg();
+			}
+		}
+	}
 	if(ticks >= get_next_tick_to_awake()){
 		// 스레드를 깨워라 sleep_list를 뒤져라
 		thread_awake(ticks);

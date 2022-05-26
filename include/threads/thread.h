@@ -28,6 +28,12 @@ typedef int tid_t;
 #define PRI_DEFAULT 31 /* Default priority. */
 #define PRI_MAX 63		 /* Highest priority. */
 
+// 추가 : nice
+#define PRI_MAX 63               
+#define NICE_DEFAULT 0
+#define RECENT_CPU_DEFAULT 0
+#define LOAD_AVG_DEFAULT 0
+
 /* A kernel thread or user process.
  *
  * Each thread structure is stored in its own 4 kB page.  The
@@ -101,8 +107,13 @@ struct thread
 	struct list_elem d_elem; /* List element. */
 	struct list donations;
 
+	// 추가: nice
+	int nice;
+	int recent_cpu;
+	
 	/* Shared between thread.c and synch.c. */
 	struct list_elem elem; /* List element. */
+	struct list_elem allelem;
 
 #ifdef USERPROG
 	/* Owned by userprog/process.c. */
@@ -168,4 +179,9 @@ bool cmp_priority(const struct list_elem *a, const struct list_elem *b, void *au
 void donate_priority(void);
 void remove_with_lock(struct lock *lock);
 void refresh_priority(void);
+
+// 수정 추가함수 : 나이스
+void mlfqs_increment (void);
+void mlfqs_recalc (void);
+void mlfqs_recalculate_priority (void);
 #endif /* threads/thread.h */
