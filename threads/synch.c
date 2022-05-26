@@ -428,54 +428,20 @@ void remove_with_lock(struct lock *lock)
 		if (t->wait_on_lock == lock)
 			list_remove(&t->d_elem);
 	}
-	// struct thread *curr = thread_current();
-	// struct list_elem *elem_lock = list_begin(&curr->donations);
-
-	// if (!list_empty(&curr->donations))
-	// {
-	// 	while (elem_lock != list_end(&curr->donations))
-	// 	{
-	// 		struct thread *t = list_entry(elem_lock, struct thread, d_elem);
-
-	// 		if (t->wait_on_lock == lock)
-	// 		{
-	// 			struct list_elem *next = list_remove(elem_lock);
-	// 			elem_lock = next;
-	// 			continue;
-	// 		}
-	// 		elem_lock = elem_lock->next;
-	// 	}
-	// }
 }
 
 void refresh_priority(void)
 {
 	struct thread *curr = thread_current();
+
 	curr->priority = curr->init_priority;
 
-	if (list_empty(&curr->donations) == false)
+	if (!list_empty(&curr->donations))
 	{
-		list_sort(&curr->donations, &cmp_donation_priority, NULL);
-		struct thread *high;
-		high = list_entry(list_front(&curr->donations), struct thread, d_elem);
-		if (high->priority > curr->priority)
-		{
-			curr->priority = high->priority;
-		}
+		list_sort(&curr->donations, cmp_priority, NULL);
+
+		struct thread *front = list_entry(list_front(&curr->donations), struct thread, d_elem);
+		if (front->priority > curr->priority)
+			curr->priority = front->priority;
 	}
-	// struct thread *curr = thread_current();
-	// curr->priority = curr->init_priority;
-
-	// if (list_empty(&curr->donations) == false)
-	// {
-	// 	list_sort(&curr->donations, &cmp_priority, NULL);
-
-	// 	struct list_elem *temp_elem = list_front(&curr->donations);
-	// 	struct thread *max = list_entry(temp_elem, struct thread, d_elem);
-
-	// 	if (max->priority > curr->priority)
-	// 	{
-	// 		curr->priority = max->priority;
-	// 	}
-	// }
 }
