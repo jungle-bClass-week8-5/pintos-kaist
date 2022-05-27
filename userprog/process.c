@@ -39,6 +39,7 @@ process_init(void)
  * before process_create_initd() returns. Returns the initd's
  * thread id, or TID_ERROR if the thread cannot be created.
  * Notice that THIS SHOULD BE CALLED ONCE. */
+/*ppt 기준 prcoess excute*/
 tid_t process_create_initd(const char *file_name)
 {
 	char *fn_copy;
@@ -50,9 +51,12 @@ tid_t process_create_initd(const char *file_name)
 	if (fn_copy == NULL)
 		return TID_ERROR;
 	strlcpy(fn_copy, file_name, PGSIZE);
-
+	/*추가*/
+	char *token, *save_ptr;
+	token = strtok_r(file_name, " ", &save_ptr);
+	printf("create token:%s", token);
 	/* Create a new thread to execute FILE_NAME. */
-	tid = thread_create(file_name, PRI_DEFAULT, initd, fn_copy);
+	tid = thread_create(token, PRI_DEFAULT, initd, fn_copy);
 	if (tid == TID_ERROR)
 		palloc_free_page(fn_copy);
 	return tid;
@@ -165,6 +169,7 @@ error:
 
 /* Switch the current execution context to the f_name.
  * Returns -1 on fail. */
+/*뇌피셜: ppt static void start_process (void *file_name_)*/
 int process_exec(void *f_name)
 {
 	char *file_name = f_name;
@@ -349,6 +354,7 @@ load(const char *file_name, struct intr_frame *if_)
 		printf("args: %s \n", args[j]);
 		j++;
 	}
+
 	/* Allocate and activate page directory. */
 	t->pml4 = pml4_create();
 	if (t->pml4 == NULL)
@@ -356,10 +362,17 @@ load(const char *file_name, struct intr_frame *if_)
 	process_activate(thread_current());
 
 	/* Open executable file. */
-	file = filesys_open(file_name);
+	// file = filesys_open(file_name);
+	// if (file == NULL)
+	// {
+	// 	printf("load: %s: open failed\n", file_name);
+	// 	goto done;
+	// }
+	/*수정*/
+	file = filesys_open(args[0]);
 	if (file == NULL)
 	{
-		printf("load: %s: open failed\n", file_name);
+		printf("load: %s: open failed\n", args[0]);
 		goto done;
 	}
 
@@ -490,6 +503,12 @@ validate_segment(const struct Phdr *phdr, struct file *file)
 
 	/* It's okay. */
 	return true;
+}
+/*추가 함수: */
+/* 함수 호출 규약에 따라 유저 스택에 프로그램 이름과 인자들을 저장 */
+void argument_stack(char **parse, int count, void **esp)
+{
+	latter
 }
 
 #ifndef VM
@@ -668,4 +687,5 @@ setup_stack(struct intr_frame *if_)
 
 	return success;
 }
+
 #endif /* VM */
