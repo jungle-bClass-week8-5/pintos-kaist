@@ -197,6 +197,7 @@ int process_exec(void *f_name)
 		printf("args: %s \n", args[count]);
 		count++;
 	}
+	printf("count: %d\n", count);
 	///////////////////////////
 
 	/* And then load the binary */
@@ -207,11 +208,11 @@ int process_exec(void *f_name)
 	argument_stack(args, count, &_if);
 
 	// 테스트용
-	hex_dump(_if.rsp, _if.rsp, KERN_BASE - _if.rsp, true);
-	printf("4444444444444444\n");
+	hex_dump(_if.rsp, _if.rsp, USER_STACK - _if.rsp, true);
 
 	/* If load failed, quit. */
-	palloc_free_page(file_name);
+	// palloc_free_page(args[0]);
+
 	if (!success)
 		return -1;
 
@@ -234,8 +235,10 @@ int process_wait(tid_t child_tid UNUSED)
 	/* XXX: Hint) The pintos exit if process_wait (initd), we recommend you
 	 * XXX:       to add infinite loop here before
 	 * XXX:       implementing the process_wait. */
-	while (1)
+	int i = 0;
+	while (i != 100000000)
 	{
+		i++;
 	}
 
 	return -1;
@@ -534,12 +537,10 @@ void argument_stack(char **parse, int count, struct intr_frame *_if)
 		arg_address[i] = _if->rsp;
 	}
 
-	uint8_t padding = 0;
-
 	while (temp % 8 != 0)
 	{
 		_if->rsp -= sizeof(uint8_t);
-		memcpy(_if->rsp, &padding, sizeof(uint8_t));
+		memset(_if->rsp, 0, sizeof(uint8_t));
 		temp++;
 	}
 
@@ -548,10 +549,11 @@ void argument_stack(char **parse, int count, struct intr_frame *_if)
 
 	for (int i = count - 1; i >= 0; i--)
 	{
-		_if->rsp -= sizeof(char *);
-		memcpy(_if->rsp, &arg_address[i], sizeof(char **));
+		_if->rsp -= 8;
+		memcpy(_if->rsp, &arg_address[i], 8);
 	}
 
+	// return address
 	_if->rsp -= 8;
 	memset(_if->rsp, 0, 8);
 
