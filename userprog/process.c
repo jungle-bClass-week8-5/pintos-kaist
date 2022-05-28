@@ -52,11 +52,12 @@ tid_t process_create_initd(const char *file_name)
 		return TID_ERROR;
 	strlcpy(fn_copy, file_name, PGSIZE);
 	/*추가*/
-	char *token, *save_ptr;
-	token = strtok_r(file_name, " ", &save_ptr);
+	// char *token, *save_ptr;
+	// token = strtok_r(file_name, " ", &save_ptr);
 
 	/* Create a new thread to execute FILE_NAME. */
-	tid = thread_create(token, PRI_DEFAULT, initd, fn_copy);
+	tid = thread_create(file_name, PRI_DEFAULT, initd, fn_copy);
+
 	if (tid == TID_ERROR)
 		palloc_free_page(fn_copy);
 	return tid;
@@ -178,12 +179,15 @@ int process_exec(void *f_name)
 	/* We cannot use the intr_frame in the thread structure.
 	 * This is because when current thread rescheduled,
 	 * it stores the execution information to the member. */
+
+	// 프로세스의 context 정보를 저장하는 구조체
 	struct intr_frame _if;
 	_if.ds = _if.es = _if.ss = SEL_UDSEG;
 	_if.cs = SEL_UCSEG;
 	_if.eflags = FLAG_IF | FLAG_MBS;
 
 	/* We first kill the current context */
+	// 기존 프로세스의 저장된 정보를 삭제 -> 페이지 디렉토리 삭제
 	process_cleanup();
 
 	/*추가 file_name 자르기*/
@@ -192,26 +196,22 @@ int process_exec(void *f_name)
 	char *token, *save_ptr;
 	for (token = strtok_r(file_name, " ", &save_ptr); token != NULL; token = strtok_r(NULL, " ", &save_ptr))
 	{
-		printf("'%s'\n", token);
 		args[count] = token;
-		printf("args: %s \n", args[count]);
 		count++;
 	}
-	printf("count: %d\n", count);
 	///////////////////////////
 
 	/* And then load the binary */
-
-	success = load(args[0], &_if);
+	success = load(file_name, &_if);
 
 	// 추가
 	argument_stack(args, count, &_if);
 
 	// 테스트용
-	hex_dump(_if.rsp, _if.rsp, USER_STACK - _if.rsp, true);
+	// hex_dump(_if.rsp, _if.rsp, USER_STACK - _if.rsp, true);
 
 	/* If load failed, quit. */
-	// palloc_free_page(args[0]);
+	palloc_free_page(file_name);
 
 	if (!success)
 		return -1;
@@ -240,7 +240,9 @@ int process_wait(tid_t child_tid UNUSED)
 	{
 		i++;
 	}
-
+	// while (1)
+	// {
+	// }
 	return -1;
 }
 
@@ -537,6 +539,7 @@ void argument_stack(char **parse, int count, struct intr_frame *_if)
 		arg_address[i] = _if->rsp;
 	}
 
+	// 8바이트로 정렬
 	while (temp % 8 != 0)
 	{
 		_if->rsp -= sizeof(uint8_t);
