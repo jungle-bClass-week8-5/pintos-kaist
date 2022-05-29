@@ -7,6 +7,9 @@
 #include "userprog/gdt.h"
 #include "threads/flags.h"
 #include "intrinsic.h"
+#include "filesys/filesys.h"
+#include "process.h"
+#include "threads/synch.h"
 
 void syscall_entry(void);
 void syscall_handler(struct intr_frame *);
@@ -56,6 +59,7 @@ void syscall_handler(struct intr_frame *f)
  */
 	// TODO: Your implementation goes here.
 	// printf("system call_Number: %d\n", f->R.rax);
+
 	switch (f->R.rax)
 	{
 	case SYS_HALT:
@@ -81,6 +85,7 @@ void syscall_handler(struct intr_frame *f)
 		break;
 	case SYS_OPEN:
 		/* code */
+		open(f->R.rdi);
 		break;
 	case SYS_FILESIZE:
 		/* code */
@@ -143,7 +148,7 @@ void syscall_handler(struct intr_frame *f)
 	default:
 		break;
 	}
-	printf("system call!\n");
+	// printf("system call!\n");
 	thread_exit();
 }
 // 추가 : 시스템콜!
@@ -164,28 +169,51 @@ void check_address(void *addr)
 
 void halt(void)
 {
-	// printf("process halt\n");
 	power_off();
 }
 
 void exit(int status)
 {
-	printf("%s: exit(%d)\n", thread_current()->name, status);
+	thread_current()->exit_status = status;
 	thread_exit();
 }
 
 bool create(const char *file, unsigned initial_size)
 {
 	// printf("process create \n");
+	check_address(file);
 	return filesys_create(file, initial_size);
 }
 
 bool remove(const char *file)
 {
 	// printf("procces remove\n");
+	check_address(file);
 	return filesys_remove(file);
 }
 
 int write(int fd, const void *buffer, unsigned size)
 {
+	if (fd == 1)
+	{
+		putbuf(buffer, size);
+	}
+}
+// file을 열고 성공하면 fd를 반환 하고 실패하면 -1을 반환
+int open(const char *file)
+{
+	// file에 대한 이름이 인자로 옴
+	check_address(file);
+	struct file *openfile = filesys_open(file);
+	if (openfile == NULL)
+		return -1;
+	return process_add_file(openfile);
+}
+
+int filesize(int fd)
+{
+	struct file *getfile = process_get_file(fd);
+	if (getfile == NULL)
+		return -1;
+	return file_length(getfile);
 }

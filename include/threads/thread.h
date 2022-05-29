@@ -29,7 +29,7 @@ typedef int tid_t;
 #define PRI_MAX 63		 /* Highest priority. */
 
 // 추가 : nice
-#define PRI_MAX 63               
+#define PRI_MAX 63
 #define NICE_DEFAULT 0
 #define RECENT_CPU_DEFAULT 0
 #define LOAD_AVG_DEFAULT 0
@@ -110,10 +110,16 @@ struct thread
 	// 추가: nice
 	int nice;
 	int recent_cpu;
-	
+
 	/* Shared between thread.c and synch.c. */
 	struct list_elem elem; /* List element. */
 	struct list_elem allelem;
+
+	// // 추가 syscall
+	int exit_status;
+
+	struct file **fdt;
+	int next_fd;
 
 #ifdef USERPROG
 	/* Owned by userprog/process.c. */
@@ -181,7 +187,7 @@ void remove_with_lock(struct lock *lock);
 void refresh_priority(void);
 
 // 수정 추가함수 : 나이스
-void mlfqs_increment (void);
-void mlfqs_recalc (void);
-void mlfqs_recalculate_priority (void);
+void mlfqs_increment(void);
+void mlfqs_recalc(void);
+void mlfqs_recalculate_priority(void);
 #endif /* threads/thread.h */

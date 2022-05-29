@@ -206,6 +206,7 @@ int process_exec(void *f_name)
 
 	// 추가
 	argument_stack(args, count, &_if);
+	check_address(_if.rsp);
 
 	// 테스트용
 	// hex_dump(_if.rsp, _if.rsp, USER_STACK - _if.rsp, true);
@@ -250,10 +251,21 @@ int process_wait(tid_t child_tid UNUSED)
 void process_exit(void)
 {
 	struct thread *curr = thread_current();
+	uint32_t *pd;
+	for (int i = curr->next_fd - 1; i > 2; i--)
+	{
+		process_close_file(i);
+	}
+	palloc_free_page(curr->fdt);
+
 	/* TODO: Your code goes here.
 	 * TODO: Implement process termination message (see
 	 * TODO: project2/process_termination.html).
 	 * TODO: We recommend you to implement process resource cleanup here. */
+
+	// 추가 : syscall
+	/* 프로세스 종료 시 호출되어 프로세스의 자원을 해제 */
+	printf("%s: exit(%d)\n", curr->name, curr->exit_status);
 
 	process_cleanup();
 }
@@ -562,6 +574,34 @@ void argument_stack(char **parse, int count, struct intr_frame *_if)
 
 	_if->R.rdi = count;
 	_if->R.rsi = _if->rsp + 8;
+}
+
+// 파일 객체에 대한 파일 디스크립터 생성
+int process_add_file(struct file *f)
+// 프로세스의 파일 디스크립터 테이블을 검색하여 파일 객체의 주소를 리턴
+{
+	struct thread *curr = thread_current();
+	curr->fdt[curr->next_fd] = f;
+	curr->next_fd++;
+	return curr->next_fd - 1;
+}
+struct file *process_get_file(int fd)
+{
+	struct thread *curr = thread_current();
+	if (!curr->fdt[fd])
+		return NULL;
+	else
+	{
+		return curr->fdt[fd];
+	}
+}
+
+// file_close() 를 호출하여, 파일 디스크립터에 해당하는 파일의 inode reference count를 1씩 감소
+void process_close_file(int fd)
+{
+	struct thread *curr = thread_current();
+	file_close(curr->fdt[fd]);
+	curr->fdt[fd] = NULL;
 }
 
 #ifndef VM
