@@ -235,6 +235,12 @@ tid_t thread_create(const char *name, int priority,
 	t->tf.cs = SEL_KCSEG;
 	t->tf.eflags = FLAG_IF;
 
+	// 추가: syscall
+	t->fdt = palloc_get_multiple(PAL_ZERO, 3);
+	t->fdt[0] = 0;
+	t->fdt[1] = 1;
+	t->next_fd = 2;
+
 	/* Add to run queue. */
 	thread_unblock(t);
 
@@ -514,10 +520,6 @@ init_thread(struct thread *t, const char *name, int priority)
 
 	// 추가 syscall
 	t->exit_status = 0;
-	t->fdt = (struct file *)palloc_get_page(PAL_ZERO);
-	t->fdt[0] = stdin;
-	t->fdt[1] = stdout;
-	t->next_fd = 2;
 
 	// 초기화
 }

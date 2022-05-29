@@ -8,8 +8,13 @@
 #include "threads/flags.h"
 #include "intrinsic.h"
 #include "filesys/filesys.h"
-#include "process.h"
+#include "userprog/process.h"
 #include "threads/synch.h"
+#include <console.h>
+
+// 추가 : 시스템콜 전역변수 락
+static struct lock sys_lock;
+static bool use_sys_lock;
 
 void syscall_entry(void);
 void syscall_handler(struct intr_frame *);
@@ -18,7 +23,7 @@ void halt(void);
 void exit(int status);
 bool create(const char *file, unsigned initial_size);
 bool remove(const char *file);
-
+int read(int fd, void *buffer, unsigned size);
 /* System call.
  *
  * Previously system call services was handled by the interrupt handler
@@ -43,6 +48,7 @@ void syscall_init(void)
 	 * mode stack. Therefore, we masked the FLAG_FL. */
 	write_msr(MSR_SYSCALL_MASK,
 						FLAG_IF | FLAG_TF | FLAG_DF | FLAG_IOPL | FLAG_AC | FLAG_NT);
+	lock_init(&sys_lock);
 }
 
 /* The main system call interface */
@@ -58,7 +64,6 @@ void syscall_handler(struct intr_frame *f)
  6번째 인자: %r9
  */
 	// TODO: Your implementation goes here.
-	// printf("system call_Number: %d\n", f->R.rax);
 
 	switch (f->R.rax)
 	{
@@ -78,14 +83,14 @@ void syscall_handler(struct intr_frame *f)
 		/* code */
 		break;
 	case SYS_CREATE:
-		create(f->R.rdi, f->R.rsi);
+		f->R.rax = create(f->R.rdi, f->R.rsi);
 		break;
 	case SYS_REMOVE:
-		remove(f->R.rdi);
+		f->R.rax = remove(f->R.rdi);
 		break;
 	case SYS_OPEN:
 		/* code */
-		open(f->R.rdi);
+		f->R.rax = open(f->R.rdi);
 		break;
 	case SYS_FILESIZE:
 		/* code */
@@ -95,7 +100,7 @@ void syscall_handler(struct intr_frame *f)
 		break;
 	case SYS_WRITE:
 		/* code */
-		write(f->R.rdi, f->R.rsi, f->R.rdx);
+		f->R.rax = write(f->R.rdi, f->R.rsi, f->R.rdx);
 		break;
 	case SYS_SEEK:
 		/* code */
@@ -146,17 +151,17 @@ void syscall_handler(struct intr_frame *f)
 		break;
 
 	default:
+		thread_exit();
 		break;
 	}
 	// printf("system call!\n");
-	thread_exit();
 }
 // 추가 : 시스템콜!
 /* 주소 값이 유저 영역에서 사용하는 주소 값인지 확인 하는 함수
 유저 영역을 벗어난 영역일 경우 프로세스 종료(exit(-1)) */
 void check_address(void *addr)
 {
-	if (is_user_vaddr(addr) == NULL || pml4_get_page(thread_current()->pml4, addr) == NULL)
+	if (!is_user_vaddr(addr) || pml4_get_page(thread_current()->pml4, addr) == NULL)
 	{
 		exit(-1);
 	}
@@ -192,11 +197,33 @@ bool remove(const char *file)
 	return filesys_remove(file);
 }
 
+int read(int fd, void *buffer, unsigned size)
+{
+	check_address(buffer);
+	if (fd == 1)
+	{
+	}
+}
+
 int write(int fd, const void *buffer, unsigned size)
 {
+	check_address(buffer);
+	if (fd == 0)
+	{
+		return -1;
+	}
 	if (fd == 1)
 	{
 		putbuf(buffer, size);
+		return sizeof(buffer);
+	}
+	else
+	{
+		lock_acquire(&sys_lock);
+		struct file *write_file = process_get_file(fd);
+
+		lock_release(&sys_lock);
+		return file_write(write_file, buffer, size);
 	}
 }
 // file을 열고 성공하면 fd를 반환 하고 실패하면 -1을 반환
