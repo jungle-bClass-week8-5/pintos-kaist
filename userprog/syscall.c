@@ -11,10 +11,13 @@
 #include "userprog/process.h"
 #include "threads/synch.h"
 #include <console.h>
+#include "filesys/file.h"
+// #include "device/input.h"
 
 // 추가 : 시스템콜 전역변수 락
 static struct lock sys_lock;
 static bool use_sys_lock;
+typedef int pid_t;
 
 void syscall_entry(void);
 void syscall_handler(struct intr_frame *);
@@ -24,6 +27,13 @@ void exit(int status);
 bool create(const char *file, unsigned initial_size);
 bool remove(const char *file);
 int read(int fd, void *buffer, unsigned size);
+pid_t fork(const char *thread_name);
+int wait(pid_t pid);
+void seek(int fd, unsigned position);
+unsigned tell(int fd);
+void close(int fd);
+int exec(const char *cmd_line);
+
 /* System call.
  *
  * Previously system call services was handled by the interrupt handler
@@ -75,12 +85,15 @@ void syscall_handler(struct intr_frame *f)
 		break;
 	case SYS_FORK:
 		/* code */
+		f->R.rax = fork(f->R.rdi);
 		break;
 	case SYS_EXEC:
 		/* code */
+		f->R.rax = exec(f->R.rdi);
 		break;
 	case SYS_WAIT:
 		/* code */
+		f->R.rax = wait(f->R.rdi);
 		break;
 	case SYS_CREATE:
 		f->R.rax = create(f->R.rdi, f->R.rsi);
@@ -93,10 +106,11 @@ void syscall_handler(struct intr_frame *f)
 		f->R.rax = open(f->R.rdi);
 		break;
 	case SYS_FILESIZE:
-		/* code */
+		f->R.rax = filesize(f->R.rdi);
 		break;
 	case SYS_READ:
 		/* code */
+		f->R.rax = read(f->R.rdi, f->R.rsi, f->R.rdx);
 		break;
 	case SYS_WRITE:
 		/* code */
@@ -104,50 +118,15 @@ void syscall_handler(struct intr_frame *f)
 		break;
 	case SYS_SEEK:
 		/* code */
+		seek(f->R.rdi, f->R.rsi);
 		break;
 	case SYS_TELL:
 		/* code */
+		f->R.rax = tell(f->R.rdi);
 		break;
 	case SYS_CLOSE:
 		/* code */
-		break;
-	case SYS_MMAP:
-		/* code */
-		break;
-	case SYS_MUNMAP:
-		/* code */
-		break;
-	case SYS_CHDIR:
-		/* code */
-		break;
-	case SYS_MKDIR:
-		/* code */
-		break;
-	case SYS_READDIR:
-		/* code */
-		break;
-	case SYS_ISDIR:
-		/* code */
-		break;
-
-	case SYS_INUMBER:
-		/* code */
-		break;
-
-	case SYS_SYMLINK:
-		/* code */
-		break;
-
-	case SYS_DUP2:
-		/* code */
-		break;
-
-	case SYS_MOUNT:
-		/* code */
-		break;
-
-	case SYS_UMOUNT:
-		/* code */
+		close(f->R.rdi);
 		break;
 
 	default:
@@ -200,15 +179,28 @@ bool remove(const char *file)
 int read(int fd, void *buffer, unsigned size)
 {
 	check_address(buffer);
-	if (fd == 1)
+	if (fd >= thread_current()->next_fd)
+		return -1;
+	if (fd < 0 || fd == 1)
+		return -1;
+	if (fd == 0) //표준 입력
 	{
+		return input_getc();
 	}
+
+	lock_acquire(&sys_lock);
+	struct file *read_file = process_get_file(fd);
+	int _size = file_read(read_file, buffer, size);
+	lock_release(&sys_lock);
+	return _size;
 }
 
 int write(int fd, const void *buffer, unsigned size)
 {
 	check_address(buffer);
-	if (fd == 0)
+	if (fd >= thread_current()->next_fd)
+		return -1;
+	if (fd < 1)
 	{
 		return -1;
 	}
@@ -243,4 +235,42 @@ int filesize(int fd)
 	if (getfile == NULL)
 		return -1;
 	return file_length(getfile);
+}
+
+void close(int fd)
+{
+	if (fd >= thread_current()->next_fd)
+		return;
+	process_close_file(fd);
+}
+
+void seek(int fd, unsigned position)
+{
+	struct file *read_file = process_get_file(fd);
+	file_seek(read_file, position);
+}
+
+unsigned tell(int fd)
+{
+	struct file *read_file = process_get_file(fd);
+	/*왜 주소가 오지(?)*/
+	off_t off = file_tell(read_file);
+	if (file_length(read_file) < off || 0 > off)
+	{
+		return -1;
+	}
+	else
+		return off;
+}
+/////////////////
+pid_t fork(const char *thread_name)
+{
+}
+
+int exec(const char *cmd_line)
+{
+}
+
+int wait(pid_t pid)
+{
 }
