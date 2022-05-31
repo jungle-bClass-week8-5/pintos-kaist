@@ -16,7 +16,6 @@
 
 // 추가 : 시스템콜 전역변수 락
 static struct lock sys_lock;
-static bool use_sys_lock;
 typedef int pid_t;
 
 void syscall_entry(void);
@@ -271,10 +270,7 @@ pid_t fork(const char *thread_name)
 {
 	struct thread *parent = thread_current();
 	pid_t fork_pid = process_fork(thread_name, &parent->tf);
-	if (fork_pid == 0)
-	{
-		sema_up(&parent->load_sema);
-	}
+
 	return fork_pid;
 }
 
@@ -286,7 +282,7 @@ int exec(const char *cmd_line)
 	struct thread *child = get_child_process(child_pid_t);
 	if (child == NULL)
 		return -1;
-	sema_down(&child->load_sema);
+
 	return child_pid_t;
 }
 

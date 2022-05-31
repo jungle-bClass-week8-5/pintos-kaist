@@ -9,6 +9,8 @@ Acceptable output:
 Differences in `diff -u' format:
   (exec-once) begin
   (exec-once) I'm your father
++ (exec-once) end
++ exec-once: exit(0)
   (child-simple) run
 - exec-once: exit(81)
 + child-simple: exit(81)

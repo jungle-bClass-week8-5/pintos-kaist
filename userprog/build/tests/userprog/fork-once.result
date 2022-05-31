@@ -1,11 +1,19 @@
 FAIL
-Kernel panic in run: PANIC at ../../userprog/exception.c:100 in kill(): Kernel bug - unexpected interrupt in kernel
-Call stack: 0x800421875f 0x800421d325 0x800421d4a4 0x8004209540 0x800420995e 0x800421bfb5 0x800420777c
-Translation of call stack:
-0x000000800421875f: debug_panic (lib/kernel/debug.c:32)
-0x000000800421d325: kill (userprog/exception.c:106)
-0x000000800421d4a4: page_fault (userprog/exception.c:165 (discriminator 12))
-0x0000008004209540: intr_handler (threads/interrupt.c:353)
-0x000000800420995e: intr_entry (threads/intr-stubs.o:?)
-0x000000800421bfb5: __do_fork (userprog/process.c:154)
-0x000000800420777c: kernel_thread (threads/thread.c:504)
+Test output failed to match any acceptable form.
+
+Acceptable output:
+  (fork-once) begin
+  (fork-once) child run
+  child: exit(81)
+  (fork-once) Parent: child exit status is 81
+  (fork-once) end
+  fork-once: exit(0)
+Differences in `diff -u' format:
+  (fork-once) begin
+- (fork-once) child run
+- child: exit(81)
+- (fork-once) Parent: child exit status is 81
++ child: exit(-1)
++ (fork-once) Parent: child exit status is 69328718
+  (fork-once) end
+  fork-once: exit(0)

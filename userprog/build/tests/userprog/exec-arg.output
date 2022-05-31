@@ -15,6 +15,8 @@ Putting 'child-args' into the file system...
 Executing 'exec-arg':
 (exec-arg) begin
 (exec-arg) I'm your father
+(exec-arg) end
+exec-arg: exit(0)
 (args) begin
 (args) argc = 2
 (args) argv[0] = 'child-args'
@@ -23,12 +25,12 @@ Executing 'exec-arg':
 (args) end
 child-args: exit(0)
 Execution of 'exec-arg' complete.
-Timer: 123 ticks
-Thread: 30 idle ticks, 91 kernel ticks, 3 user ticks
+Timer: 126 ticks
+Thread: 30 idle ticks, 93 kernel ticks, 3 user ticks
 hd0:0: 0 reads, 0 writes
 hd0:1: 154 reads, 448 writes
 hd1:0: 205 reads, 0 writes
-Console: 1029 characters output
+Console: 1062 characters output
 Keyboard: 0 keys pressed
 Exception: 0 page faults
 Powering off...

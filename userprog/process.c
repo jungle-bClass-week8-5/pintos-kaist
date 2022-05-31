@@ -83,8 +83,21 @@ initd(void *f_name)
 tid_t process_fork(const char *name, struct intr_frame *if_ UNUSED)
 {
 	/* Clone current thread to new thread.*/
-	return thread_create(name,
-											 PRI_DEFAULT, __do_fork, thread_current());
+	struct thread *curr = thread_current();
+	// 다시 확인
+	memcpy(&curr->parent_if, if_, sizeof(struct intr_frame));
+	tid_t tid = thread_create(name, PRI_DEFAULT, __do_fork, curr);
+
+	if (tid == TID_ERROR)
+	{
+		return TID_ERROR;
+	}
+	struct thread *child = get_child_process(tid);
+	sema_down(&child->load_sema);
+	// if (child->exit_status == -1)
+	// 	return TID_ERROR;
+
+	return tid;
 }
 
 #ifndef VM
@@ -98,24 +111,34 @@ duplicate_pte(uint64_t *pte, void *va, void *aux)
 	void *parent_page;
 	void *newpage;
 	bool writable;
-
+	// 다시 보기
 	/* 1. TODO: If the parent_page is kernel page, then return immediately. */
-
+	if (is_kern_pte(pte))
+		return false;
 	/* 2. Resolve VA from the parent's page map level 4. */
 	parent_page = pml4_get_page(parent->pml4, va);
-
+	if (parent_page == NULL)
+	{
+		return false;
+	}
 	/* 3. TODO: Allocate new PAL_USER page for the child and set result to
 	 *    TODO: NEWPAGE. */
-
+	newpage = palloc_get_page(PAL_USER | PAL_ZERO);
+	if (newpage == NULL)
+	{
+		return false;
+	}
 	/* 4. TODO: Duplicate parent's page to the new page and
 	 *    TODO: check whether parent's page is writable or not (set WRITABLE
 	 *    TODO: according to the result). */
-
+	memcpy(newpage, parent_page, PGSIZE);
+	writable = is_writable(pte);
 	/* 5. Add new page to child's page table at address VA with WRITABLE
 	 *    permission. */
 	if (!pml4_set_page(current->pml4, va, newpage, writable))
 	{
 		/* 6. TODO: if fail to insert page, do error handling. */
+		return false;
 	}
 	return true;
 }
@@ -135,10 +158,11 @@ __do_fork(void *aux)
 	struct intr_frame *parent_if;
 	bool succ = true;
 
-	// 추가 syscall fork()
-	parent_if = &parent->tf;
+	// 추가 syscall fork() // 왜 부모 if를 넣는지 고민해보기
+	parent_if = &parent->parent_if;
 	/* 1. Read the cpu context to local stack. */
 	memcpy(&if_, parent_if, sizeof(struct intr_frame));
+	if_.R.rax = 0;
 
 	/* 2. Duplicate PT */
 	current->pml4 = pml4_create();
@@ -162,7 +186,22 @@ __do_fork(void *aux)
 	 * TODO:       the resources of parent.*/
 
 	// 추가 syscall fork() / 자식 프로세스에 부모 fdt 복사
-	current->fdt = file_duplicate(parent->fdt);
+	// fdt 자식에게 복사
+	for (int i = 0; i < parent->next_fd; i++)
+	{
+		struct file *file = parent->fdt[i];
+		if (file == NULL)
+			continue;
+
+		struct file *new_file;
+		if (file > 1)
+			new_file = file_duplicate(file);
+		else
+			new_file = file;
+		current->fdt[i] = new_file;
+	}
+	current->next_fd = parent->next_fd;
+	sema_up(&current->load_sema);
 
 	process_init();
 
@@ -170,7 +209,10 @@ __do_fork(void *aux)
 	if (succ)
 		do_iret(&if_);
 error:
-	thread_exit();
+	// thread_exit();
+	current->exit_status = TID_ERROR;
+	sema_up(&current->load_sema);
+	exit(TID_ERROR);
 }
 
 /* Switch the current execution context to the f_name.
@@ -620,9 +662,7 @@ struct thread *get_child_process(int pid)
 	{
 		struct thread *child = list_entry(child_list_fist, struct thread, child_elem);
 		if (child->tid == pid)
-		{
 			return child;
-		}
 		child_list_fist = child_list_fist->next;
 	}
 	return NULL;

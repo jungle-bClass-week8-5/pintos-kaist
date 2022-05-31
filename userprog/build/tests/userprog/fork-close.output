@@ -15,27 +15,17 @@ Putting 'sample.txt' into the file system...
 Executing 'fork-close':
 (fork-close) begin
 (fork-close) open "sample.txt"
+child: exit(-1)
 (fork-close) Parent success
 (fork-close) end
 fork-close: exit(0)
-Page fault at 0: not present error reading page in kernel context.
-Interrupt 0x0e (#PF Page-Fault Exception) at rip=800420d2bf
- cr2=0000000000000000 error=               0
-rax 0000000000000000 rbx 0000000000000000 rcx 0000008004243000 rdx 0000000000000000
-rsp 0000008004241ea0 rbp 0000008004241ed0 rsi 000000800421be73 rdi 0000000000000000
-rip 000000800420d2bf r8 0000000000000000  r9 0000000000000000 r10 0000000000000000
-r11 0000000000000000 r12 0000000000000000 r13 0000000000000000 r14 0000000000000000
-r15 00000080042410d8 rflags 00000246
-es: 0010 ds: 0010 cs: 0008 ss: 0010
-Kernel PANIC at ../../userprog/exception.c:100 in kill(): Kernel bug - unexpected interrupt in kernel
-Call stack: 0x800421875f 0x800421d325 0x800421d4a4 0x8004209540 0x800420995e 0x800421bfb5 0x800420777c.
-The `backtrace' program can make call stacks useful.
-Read "Backtraces" in the "Debugging Tools" chapter
-of the Pintos documentation for more information.
-Timer: 70 ticks
-Thread: 30 idle ticks, 35 kernel ticks, 5 user ticks
+Execution of 'fork-close' complete.
+Timer: 120 ticks
+Thread: 30 idle ticks, 89 kernel ticks, 1 user ticks
 hd0:0: 0 reads, 0 writes
 hd0:1: 122 reads, 258 writes
 hd1:0: 110 reads, 0 writes
-Console: 1872 characters output
-Key
+Console: 985 characters output
+Keyboard: 0 keys pressed
+Exception: 0 page faults
+Powering off...

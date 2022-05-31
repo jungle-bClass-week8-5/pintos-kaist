@@ -14,6 +14,8 @@ Acceptable output:
 Differences in `diff -u' format:
   (exec-arg) begin
   (exec-arg) I'm your father
++ (exec-arg) end
++ exec-arg: exit(0)
   (args) begin
   (args) argc = 2
   (args) argv[0] = 'child-args'

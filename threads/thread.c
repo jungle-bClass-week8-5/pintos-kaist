@@ -248,17 +248,16 @@ tid_t thread_create(const char *name, int priority,
 	/* exit 세마포어 0으로 초기화 */
 	/* load 세마포어 0으로 초기화 */
 	sema_init(&t->load_sema, 0);
-	/* 자식 리스트에 추가 */
 
+	/* 자식 리스트에 추가 */
 	list_push_back(&curr->child_list, &t->child_elem);
+
 	/* Add to run queue. */
 	thread_unblock(t);
 
+	// 추가: syscall fork()
+
 	/* 수정 추가함수 :우선순위 */
-
-	// 추가: syscall
-	t->parent_tid = curr->tid;
-
 	if (t->priority > curr->priority)
 	{
 		thread_yield();
@@ -494,6 +493,7 @@ idle(void *idle_started_ UNUSED)
 }
 
 /* Function used as the basis for a kernel thread. */
+// 스케줄러는 인터럽트가 꺼진 상태에서 실행
 static void
 kernel_thread(thread_func *function, void *aux)
 {
@@ -713,7 +713,7 @@ schedule(void)
 
 		/* Before switching the thread, we first save the information
 		 * of current running. */
-		// 스레드 전환 전 현재 실행 중인 정보를 저장 -> PCB 저장 부분???
+		// 스레드 전환 전 현재 실행 중인 정보를 저장 -> PCB 저장 부분
 		thread_launch(next);
 	}
 }

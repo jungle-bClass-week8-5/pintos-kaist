@@ -119,11 +119,10 @@ struct thread
 	int exit_status;	 // thread 종료 상태 저장
 	struct file **fdt; // file discripter table 초기 0, 1
 	int next_fd;			 // 추가될 next_fd 저장
-
+	struct intr_frame parent_if;
 	struct list child_list;
 	struct list_elem child_elem;
-	tid_t parent_tid;
-	bool mem_alloc_bool;
+	// struct bool mem_alloc_bool;
 
 	struct semaphore *load_sema;
 	// struct semaphore exit_sema; //????
