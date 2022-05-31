@@ -44,7 +44,7 @@ FAIL tests/userprog/exec-once
 FAIL tests/userprog/exec-arg
 FAIL tests/userprog/exec-boundary
 FAIL tests/userprog/exec-missing
-pass tests/userprog/exec-bad-ptr
+FAIL tests/userprog/exec-bad-ptr
 FAIL tests/userprog/exec-read
 FAIL tests/userprog/wait-simple
 FAIL tests/userprog/wait-twice
@@ -74,7 +74,7 @@ pass tests/filesys/base/sm-seq-random
 FAIL tests/filesys/base/syn-read
 pass tests/filesys/base/syn-remove
 FAIL tests/filesys/base/syn-write
-pass tests/userprog/no-vm/multi-oom
+FAIL tests/userprog/no-vm/multi-oom
 FAIL tests/threads/alarm-single
 FAIL tests/threads/alarm-multiple
 FAIL tests/threads/alarm-simultaneous

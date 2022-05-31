@@ -25,16 +25,27 @@ Executing 'syn-write':
 (syn-write) exec child 8 of 10: "child-syn-wrt 7"
 (syn-write) exec child 9 of 10: "child-syn-wrt 8"
 (syn-write) exec child 10 of 10: "child-syn-wrt 9"
-(syn-write) wait for child 1 of 10 returned 69327804 (expected 0)
-(syn-write) wait for child 1 of 10 returned 69327804 (expected 0): FAILED
+(syn-write) wait for child 1 of 10 returned 69328296 (expected 0)
+(syn-write) wait for child 1 of 10 returned 69328296 (expected 0): FAILED
 syn-write: exit(1)
-Execution of 'syn-write' complete.
-Timer: 127 ticks
-Thread: 30 idle ticks, 91 kernel ticks, 6 user ticks
+Page fault at 0x18: not present error reading page in kernel context.
+Interrupt 0x0e (#PF Page-Fault Exception) at rip=8004208242
+ cr2=0000000000000018 error=               0
+rax 0000000000000000 rbx 0000000000000000 rcx 0000000000000000 rdx 000000000000001f
+rsp 0000008004241e00 rbp 0000008004241e20 rsi 0000008004241028 rdi 0000008004242048
+rip 0000008004208242 r8 0000000000000000  r9 0000000000000000 r10 0000000000000000
+r11 0000000000000000 r12 0000000000000000 r13 0000000000000000 r14 0000000000000000
+r15 00000080042410d8 rflags 00000202
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Kernel PANIC at ../../userprog/exception.c:100 in kill(): Kernel bug - unexpected interrupt in kernel
+Call stack: 0x800421875f 0x800421d325 0x800421d4a4 0x8004209540 0x800420995e 0x800420aaaa 0x800420bd53 0x800420be57 0x800420d050 0x800421bf58 0x800420777c.
+The `backtrace' program can make call stacks useful.
+Read "Backtraces" in the "Debugging Tools" chapter
+of the Pintos documentation for more information.
+Timer: 99 ticks
+Thread: 30 idle ticks, 62 kernel ticks, 7 user ticks
 hd0:0: 0 reads, 0 writes
 hd0:1: 132 reads, 512 writes
 hd1:0: 226 reads, 0 writes
-Console: 1561 characters output
-Keyboard: 0 keys pressed
-Exception: 0 page faults
-Powering off...
+Console: 2520 characters output
+Key

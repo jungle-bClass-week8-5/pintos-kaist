@@ -135,6 +135,8 @@ __do_fork(void *aux)
 	struct intr_frame *parent_if;
 	bool succ = true;
 
+	// 추가 syscall fork()
+	parent_if = &parent->tf;
 	/* 1. Read the cpu context to local stack. */
 	memcpy(&if_, parent_if, sizeof(struct intr_frame));
 
@@ -158,6 +160,9 @@ __do_fork(void *aux)
 	 * TODO:       in include/filesys/file.h. Note that parent should not return
 	 * TODO:       from the fork() until this function successfully duplicates
 	 * TODO:       the resources of parent.*/
+
+	// 추가 syscall fork() / 자식 프로세스에 부모 fdt 복사
+	current->fdt = file_duplicate(parent->fdt);
 
 	process_init();
 
@@ -206,7 +211,7 @@ int process_exec(void *f_name)
 
 	// 추가
 	argument_stack(args, count, &_if);
-	check_address(_if.rsp);
+	// check_address(_if.rsp);
 
 	// 테스트용
 	// hex_dump(_if.rsp, _if.rsp, USER_STACK - _if.rsp, true);
@@ -265,7 +270,6 @@ void process_exit(void)
 
 	// 추가 : syscall
 	/* 프로세스 종료 시 호출되어 프로세스의 자원을 해제 */
-	printf("%s: exit(%d)\n", curr->name, curr->exit_status);
 
 	process_cleanup();
 }
@@ -596,13 +600,39 @@ struct file *process_get_file(int fd)
 		return curr->fdt[fd];
 	}
 }
-
 // file_close() 를 호출하여, 파일 디스크립터에 해당하는 파일의 inode reference count를 1씩 감소
 void process_close_file(int fd)
 {
 	struct thread *curr = thread_current();
 	file_close(curr->fdt[fd]);
 	curr->fdt[fd] = NULL;
+}
+
+// 자식 리스트를 pid로 검색하여 해당 프로세스 디스크립터를 반환 없으면 null
+struct thread *get_child_process(int pid)
+{
+	/* 자식 리스트에 접근하여 프로세스 디스크립터 검색 */
+	/* 해당 pid가 존재하면 프로세스 디스크립터 반환 */
+	/* 리스트에 존재하지 않으면 NULL 리턴 */
+	struct thread *parent = thread_current();
+	struct list_elem *child_list_fist = list_begin(&parent->child_list);
+	while (child_list_fist != list_end(&parent->child_list))
+	{
+		struct thread *child = list_entry(child_list_fist, struct thread, child_elem);
+		if (child->tid == pid)
+		{
+			return child;
+		}
+		child_list_fist = child_list_fist->next;
+	}
+	return NULL;
+}
+
+//부모 프로세스의 자식 리스트에서 프로세스 디스크립터 제거
+void remove_child_process(struct thread *cp)
+{
+	/* 자식 리스트에서 제거*/
+	/* 프로세스 디스크립터 메모리 해제 */
 }
 
 #ifndef VM

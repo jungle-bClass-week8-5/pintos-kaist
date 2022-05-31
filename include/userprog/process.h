@@ -15,4 +15,7 @@ void argument_stack(char **parse, int count, struct intr_frame *_if);
 int process_add_file(struct file *f);
 struct file *process_get_file(int fd);
 void process_close_file(int fd);
+struct thread *get_child_process(int pid);
+void remove_child_process(struct thread *cp);
+
 #endif /* userprog/process.h */

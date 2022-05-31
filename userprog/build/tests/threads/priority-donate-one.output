@@ -4,19 +4,19 @@ Kernel command line: -q -threads-tests -f run priority-donate-one
 Pintos booting with: 
 	base_mem: 0x0 ~ 0x9fc00 (Usable: 639 kB)
 	ext_mem: 0x100000 ~ 0x13e0000 (Usable: 19,328 kB)
-Calibrating timer...  157,081,600 loops/s.
+Calibrating timer...  155,443,200 loops/s.
 hd0:0: detected 321 sector (160 kB) disk, model "QEMU HARDDISK", serial "QM00001"
 hd0:1: detected 20,160 sector (9 MB) disk, model "QEMU HARDDISK", serial "QM00002"
 Formatting file system...done.
 Boot complete.
 Executing 'priority-donate-one':
 Kernel PANIC at ../../tests/threads/tests.c:59 in run_test(): no test named "priority-donate-one"
-Call stack: 0x80042186f1 0x800420ddb4 0x8004206750 0x80042068c0 0x800420617a.
+Call stack: 0x800421875f 0x800420de22 0x8004206750 0x80042068c0 0x800420617a.
 The `backtrace' program can make call stacks useful.
 Read "Backtraces" in the "Debugging Tools" chapter
 of the Pintos documentation for more information.
-Timer: 54 ticks
-Thread: 30 idle ticks, 24 kernel ticks, 0 user ticks
+Timer: 55 ticks
+Thread: 30 idle ticks, 25 kernel ticks, 0 user ticks
 hd0:0: 0 reads, 0 writes
 hd0:1: 9 reads, 18 writes
 Console: 949 characters output

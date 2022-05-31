@@ -1,2 +1,15 @@
 FAIL
-run: wait for child 1 of 10 returned 69327804 (expected 0): FAILED
+Kernel panic in run: PANIC at ../../userprog/exception.c:100 in kill(): Kernel bug - unexpected interrupt in kernel
+Call stack: 0x800421875f 0x800421d325 0x800421d4a4 0x8004209540 0x800420995e 0x800420aaaa 0x800420bd53 0x800420be57 0x800420d050 0x800421bf58 0x800420777c
+Translation of call stack:
+0x000000800421875f: debug_panic (lib/kernel/debug.c:32)
+0x000000800421d325: kill (userprog/exception.c:106)
+0x000000800421d4a4: page_fault (userprog/exception.c:165 (discriminator 12))
+0x0000008004209540: intr_handler (threads/interrupt.c:353)
+0x000000800420995e: intr_entry (threads/intr-stubs.o:?)
+0x000000800420aaaa: lock_acquire (threads/synch.c:226)
+0x000000800420bd53: palloc_get_multiple (threads/palloc.c:299 (discriminator 4))
+0x000000800420be57: palloc_get_page (threads/palloc.c:333)
+0x000000800420d050: pml4_create (threads/mmu.c:119)
+0x000000800421bf58: __do_fork (userprog/process.c:144)
+0x000000800420777c: kernel_thread (threads/thread.c:504)

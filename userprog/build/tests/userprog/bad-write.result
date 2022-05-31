@@ -14,6 +14,5 @@ Differences in `diff -u' format:
 + r11 0000000000000206 r12 0000000000000000 r13 0000000000000000 r14 0000000000000000
 + r15 0000000000000000 rflags 00000212
 + es: 001b ds: 001b cs: 0023 ss: 001b
-+ bad-write: exit(0)
 
 (User fault messages are excluded for matching purposes.)

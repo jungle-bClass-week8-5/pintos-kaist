@@ -79,6 +79,7 @@ int main(void)
 
 	/* Initialize ourselves as a thread so we can use locks,
 		 then enable console locking. */
+	// thread 실행을 위한 초기화
 	thread_init();
 	console_init();
 

@@ -219,13 +219,18 @@ tid_t thread_create(const char *name, int priority,
 		return TID_ERROR;
 
 	/* Initialize thread. */
-
 	init_thread(t, name, priority);
+
+	t->fdt = palloc_get_multiple(PAL_ZERO, 2);
+	t->fdt[0] = 0;
+	t->fdt[1] = 1;
+	t->next_fd = 2;
 
 	tid = t->tid = allocate_tid();
 
 	/* Call the kernel_thread if it scheduled.
 	 * Note) rdi is 1st argument, and rsi is 2nd argument. */
+	// rip => 다음 실행할 명령어의 메모리 주소
 	t->tf.rip = (uintptr_t)kernel_thread;
 	t->tf.R.rdi = (uint64_t)function;
 	t->tf.R.rsi = (uint64_t)aux;
@@ -236,16 +241,24 @@ tid_t thread_create(const char *name, int priority,
 	t->tf.eflags = FLAG_IF;
 
 	// 추가: syscall
-	t->fdt = palloc_get_multiple(PAL_ZERO, 3);
-	t->fdt[0] = 0;
-	t->fdt[1] = 1;
-	t->next_fd = 2;
+	struct thread *curr = thread_current();
+	/* 부모 프로세스 저장 */
+	/* 프로그램이 로드되지 않음 */
+	/* 프로세스가 종료되지 않음 */
+	/* exit 세마포어 0으로 초기화 */
+	/* load 세마포어 0으로 초기화 */
+	sema_init(&t->load_sema, 0);
+	/* 자식 리스트에 추가 */
 
+	list_push_back(&curr->child_list, &t->child_elem);
 	/* Add to run queue. */
 	thread_unblock(t);
 
 	/* 수정 추가함수 :우선순위 */
-	struct thread *curr = thread_current();
+
+	// 추가: syscall
+	t->parent_tid = curr->tid;
+
 	if (t->priority > curr->priority)
 	{
 		thread_yield();
@@ -520,8 +533,8 @@ init_thread(struct thread *t, const char *name, int priority)
 
 	// 추가 syscall
 	t->exit_status = 0;
-
-	// 초기화
+	list_init(&t->child_list);
+	/* 자식 리스트 초기화 */
 }
 
 /* Chooses and returns the next thread to be scheduled.  Should

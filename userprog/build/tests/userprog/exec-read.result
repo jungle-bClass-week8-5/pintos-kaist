@@ -1,31 +1,11 @@
 FAIL
-Test output failed to match any acceptable form.
-
-Acceptable output:
-  (exec-read) begin
-  (exec-read) open "sample.txt"
-  (exec-read) read "sample.txt" first 20 bytes
-  (child-read) begin
-  (child-read) open "sample.txt"
-  (child-read) read "sample.txt" first 20 bytes
-  (child-read) read "sample.txt" remainders
-  (child-read) Child success
-  (child-read) end
-  child-read: exit(0)
-  (exec-read) Parent success
-  (exec-read) end
-  exec-read: exit(0)
-Differences in `diff -u' format:
-  (exec-read) begin
-  (exec-read) open "sample.txt"
-  (exec-read) read "sample.txt" first 20 bytes
-- (child-read) begin
-- (child-read) open "sample.txt"
-- (child-read) read "sample.txt" first 20 bytes
-- (child-read) read "sample.txt" remainders
-- (child-read) Child success
-- (child-read) end
-- child-read: exit(0)
-  (exec-read) Parent success
-  (exec-read) end
-  exec-read: exit(0)
+Kernel panic in run: PANIC at ../../userprog/exception.c:100 in kill(): Kernel bug - unexpected interrupt in kernel
+Call stack: 0x800421875f 0x800421d325 0x800421d4a4 0x8004209540 0x800420995e 0x800421bfb5 0x800420777c
+Translation of call stack:
+0x000000800421875f: debug_panic (lib/kernel/debug.c:32)
+0x000000800421d325: kill (userprog/exception.c:106)
+0x000000800421d4a4: page_fault (userprog/exception.c:165 (discriminator 12))
+0x0000008004209540: intr_handler (threads/interrupt.c:353)
+0x000000800420995e: intr_entry (threads/intr-stubs.o:?)
+0x000000800421bfb5: __do_fork (userprog/process.c:154)
+0x000000800420777c: kernel_thread (threads/thread.c:504)

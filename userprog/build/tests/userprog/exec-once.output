@@ -15,15 +15,15 @@ Putting 'child-simple' into the file system...
 Executing 'exec-once':
 (exec-once) begin
 (exec-once) I'm your father
-(exec-once) end
-exec-once: exit(0)
+(child-simple) run
+child-simple: exit(81)
 Execution of 'exec-once' complete.
 Timer: 122 ticks
-Thread: 30 idle ticks, 91 kernel ticks, 1 user ticks
+Thread: 30 idle ticks, 90 kernel ticks, 2 user ticks
 hd0:0: 0 reads, 0 writes
-hd0:1: 107 reads, 446 writes
+hd0:1: 159 reads, 446 writes
 hd1:0: 204 reads, 0 writes
-Console: 935 characters output
+Console: 942 characters output
 Keyboard: 0 keys pressed
 Exception: 0 page faults
 Powering off...

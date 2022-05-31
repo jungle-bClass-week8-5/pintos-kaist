@@ -158,7 +158,10 @@ void halt(void)
 
 void exit(int status)
 {
-	thread_current()->exit_status = status;
+	struct thread *curr = thread_current();
+
+	curr->exit_status = status;
+	printf("%s: exit(%d)\n", curr->name, curr->exit_status);
 	thread_exit();
 }
 
@@ -227,6 +230,7 @@ int open(const char *file)
 	if (openfile == NULL)
 		return -1;
 	return process_add_file(openfile);
+	// return filesys_open(file);
 }
 
 int filesize(int fd)
@@ -265,10 +269,25 @@ unsigned tell(int fd)
 /////////////////
 pid_t fork(const char *thread_name)
 {
+	struct thread *parent = thread_current();
+	pid_t fork_pid = process_fork(thread_name, &parent->tf);
+	if (fork_pid == 0)
+	{
+		sema_up(&parent->load_sema);
+	}
+	return fork_pid;
 }
 
 int exec(const char *cmd_line)
 {
+	struct thread *parent = thread_current();
+	pid_t child_pid_t = process_create_initd(cmd_line);
+	// 자식 찾아서 세마 다운
+	struct thread *child = get_child_process(child_pid_t);
+	if (child == NULL)
+		return -1;
+	sema_down(&child->load_sema);
+	return child_pid_t;
 }
 
 int wait(pid_t pid)
