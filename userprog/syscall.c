@@ -276,16 +276,35 @@ pid_t fork(const char *thread_name)
 
 int exec(const char *cmd_line)
 {
-	struct thread *parent = thread_current();
-	pid_t child_pid_t = process_create_initd(cmd_line);
-	// 자식 찾아서 세마 다운
-	struct thread *child = get_child_process(child_pid_t);
-	if (child == NULL)
-		return -1;
+	// check_address(cmd_line);
 
-	return child_pid_t;
+	// int size = strlen(cmd_line) + 1;
+	// char *fn_copy = palloc_get_page(2);
+	// if ((fn_copy) == NULL)
+	// {
+	// 	exit(-1);
+	// }
+	// strlcpy(fn_copy, cmd_line, size);
+
+	// if (process_exec(fn_copy) == -1)
+	// {
+	// 	return -1;
+	// }
+
+	// NOT_REACHED();
+	// return 0;
+
+	// struct thread *parent = thread_current();
+	// pid_t child_pid_t = process_create_initd(cmd_line);
+	// // 자식 찾아서 세마 다운
+	// struct thread *child = get_child_process(child_pid_t);
+	// if (child == NULL)
+	// 	return -1;
+
+	// return child_pid_t;
 }
 
 int wait(pid_t pid)
 {
+	process_wait(pid);
 }

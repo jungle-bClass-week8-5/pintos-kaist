@@ -84,18 +84,20 @@ tid_t process_fork(const char *name, struct intr_frame *if_ UNUSED)
 {
 	/* Clone current thread to new thread.*/
 	struct thread *curr = thread_current();
-	// 다시 확인
+
+	// 왜 현재의 부모의 if에 복사 후 do_fork에서 사용하지?
 	memcpy(&curr->parent_if, if_, sizeof(struct intr_frame));
 	tid_t tid = thread_create(name, PRI_DEFAULT, __do_fork, curr);
 
 	if (tid == TID_ERROR)
-	{
 		return TID_ERROR;
-	}
+
 	struct thread *child = get_child_process(tid);
-	sema_down(&child->load_sema);
-	// if (child->exit_status == -1)
-	// 	return TID_ERROR;
+
+	sema_down(&child->fork_sema);
+
+	if (!child)
+		return TID_ERROR;
 
 	return tid;
 }
@@ -187,7 +189,7 @@ __do_fork(void *aux)
 
 	// 추가 syscall fork() / 자식 프로세스에 부모 fdt 복사
 	// fdt 자식에게 복사
-	for (int i = 0; i < parent->next_fd; i++)
+	for (int i = 0; i < 128; i++)
 	{
 		struct file *file = parent->fdt[i];
 		if (file == NULL)
@@ -201,9 +203,10 @@ __do_fork(void *aux)
 		current->fdt[i] = new_file;
 	}
 	current->next_fd = parent->next_fd;
-	sema_up(&current->load_sema);
 
+	// 깨름직
 	process_init();
+	sema_up(&current->fork_sema);
 
 	/* Finally, switch to the newly created process. */
 	if (succ)
@@ -211,7 +214,7 @@ __do_fork(void *aux)
 error:
 	// thread_exit();
 	current->exit_status = TID_ERROR;
-	sema_up(&current->load_sema);
+	sema_up(&current->fork_sema);
 	exit(TID_ERROR);
 }
 
@@ -283,15 +286,21 @@ int process_wait(tid_t child_tid UNUSED)
 	/* XXX: Hint) The pintos exit if process_wait (initd), we recommend you
 	 * XXX:       to add infinite loop here before
 	 * XXX:       implementing the process_wait. */
-	int i = 0;
-	while (i != 100000000)
-	{
-		i++;
-	}
-	// while (1)
-	// {
-	// }
-	return -1;
+
+	struct thread *child = get_child_process(child_tid);
+
+	if (child == NULL)
+		return -1;
+
+	sema_down(&child->load_sema);
+
+	int exit_status = child->exit_status;
+
+	list_remove(&child->child_elem);
+	// remove_child_process(child);
+	sema_up(&child->exit_sema);
+
+	return exit_status;
 }
 
 /* Exit the process. This function is called by thread_exit (). */
@@ -303,7 +312,7 @@ void process_exit(void)
 	{
 		process_close_file(i);
 	}
-	palloc_free_page(curr->fdt);
+	palloc_free_multiple(curr->fdt, 2);
 
 	/* TODO: Your code goes here.
 	 * TODO: Implement process termination message (see
@@ -312,6 +321,9 @@ void process_exit(void)
 
 	// 추가 : syscall
 	/* 프로세스 종료 시 호출되어 프로세스의 자원을 해제 */
+	file_close(curr->running);
+	sema_up(&curr->load_sema);
+	sema_down(&curr->exit_sema);
 
 	process_cleanup();
 }
@@ -527,6 +539,8 @@ load(const char *file_name, struct intr_frame *if_)
 
 	/* TODO: Your code goes here.
 	 * TODO: Implement argument passing (see project2/argument_passing.html). */
+	t->running = file;
+	file_deny_write(file);
 
 	success = true;
 
@@ -669,11 +683,24 @@ struct thread *get_child_process(int pid)
 }
 
 //부모 프로세스의 자식 리스트에서 프로세스 디스크립터 제거
-void remove_child_process(struct thread *cp)
-{
-	/* 자식 리스트에서 제거*/
-	/* 프로세스 디스크립터 메모리 해제 */
-}
+// void remove_child_process(struct thread *cp)
+// {
+// 	/* 자식 리스트에서 제거*/
+// 	/* 프로세스 디스크립터 메모리 해제 */
+// 	struct thread *parent = thread_current();
+// 	struct list_elem *child_list_fist = list_begin(&parent->child_list);
+// 	while (child_list_fist != list_end(&parent->child_list))
+// 	{
+// 		struct thread *child = list_entry(child_list_fist, struct thread, child_elem);
+// 		if (child->tid == cp->tid)
+// 		{
+// 			list_remove(child_list_fist);
+// 			palloc_free_page(child);
+// 			break;
+// 		}
+// 		child_list_fist = child_list_fist->next;
+// 	}
+// }
 
 #ifndef VM
 /* Codes of this block will be ONLY USED DURING project 2.
