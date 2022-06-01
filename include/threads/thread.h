@@ -124,29 +124,16 @@ struct thread
 	struct list_elem child_elem;
 	// struct bool mem_alloc_bool;
 
+	struct semaphore *fork_sema;
 	struct semaphore *load_sema;
+	struct semaphore *exit_sema;
+	struct file *running;
+	struct thread *parent;
 	// struct semaphore exit_sema; //????
-
-	// 프로세스의 생성 성공 여부를 확인하는 플래그 추가 (실행 파일이 로드에 실패하면 -1)
-	// 프로세스의 종료 유무를 확인하는 필드 추가
-	// 프로세스의 종료 상태를 나타내는 필드 추가 -> 이건 추가한거 같은데 exit_thread
-	// 자식 프로세스의 생성/종료 대기를 위한 세마포어 추가
-	// 자식 프로세스 리스트 필드 추가 : 자식 리스트, 자식 리스트 element
-	// 부모 프로세스 디스크립터를 가리키는 필드 추가
-	/* 부모 프로세스의 디스크립터 */
-
-	/* 자식 리스트 element */
-	/* 자식 리스트 */
-	/* 프로세스의 프로그램 메모리 적재 유무 */
-	/* 프로세스가 종료 유무 확인 */
-	/* exit 세마포어 */
-	/* load 세마포어 */
-	/* exit 호출 시 종료 status */
 
 #ifdef USERPROG
 	/* Owned by userprog/process.c. */
 	uint64_t *pml4; /* Page map level 4 */
-									// // 추가 syscall
 
 #endif
 #ifdef VM

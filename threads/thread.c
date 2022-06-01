@@ -138,7 +138,6 @@ void thread_init(void)
 
 	init_thread(initial_thread, "main", PRI_DEFAULT);
 	initial_thread->status = THREAD_RUNNING;
-
 	initial_thread->tid = allocate_tid();
 }
 
@@ -221,11 +220,6 @@ tid_t thread_create(const char *name, int priority,
 	/* Initialize thread. */
 	init_thread(t, name, priority);
 
-	t->fdt = palloc_get_multiple(PAL_ZERO, 2);
-	t->fdt[0] = 0;
-	t->fdt[1] = 1;
-	t->next_fd = 2;
-
 	tid = t->tid = allocate_tid();
 
 	/* Call the kernel_thread if it scheduled.
@@ -242,15 +236,23 @@ tid_t thread_create(const char *name, int priority,
 
 	// 추가: syscall
 	struct thread *curr = thread_current();
+	// t->parent = curr;
+	sema_init(&t->exit_sema, 0);
+	sema_init(&t->load_sema, 0);
+	sema_init(&t->fork_sema, 0);
+
 	/* 부모 프로세스 저장 */
 	/* 프로그램이 로드되지 않음 */
 	/* 프로세스가 종료되지 않음 */
 	/* exit 세마포어 0으로 초기화 */
 	/* load 세마포어 0으로 초기화 */
-	sema_init(&t->load_sema, 0);
-
 	/* 자식 리스트에 추가 */
 	list_push_back(&curr->child_list, &t->child_elem);
+
+	t->fdt = palloc_get_multiple(PAL_ZERO, 2);
+	t->fdt[0] = 0;
+	t->fdt[1] = 1;
+	t->next_fd = 2;
 
 	/* Add to run queue. */
 	thread_unblock(t);
@@ -352,6 +354,7 @@ void thread_exit(void)
 		 We will be destroyed during the call to schedule_tail(). */
 	intr_disable();
 	list_remove(&thread_current()->allelem);
+
 	do_schedule(THREAD_DYING);
 	NOT_REACHED();
 }

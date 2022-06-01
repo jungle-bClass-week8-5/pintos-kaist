@@ -208,12 +208,14 @@ void lock_acquire(struct lock *lock)
 
 	struct thread *curr = thread_current();
 	// 추가 : 나이스
+
 	if (thread_mlfqs)
 	{
 		sema_down(&lock->semaphore);
 		lock->holder = thread_current();
 		return;
 	}
+
 	// 자원이 이미 lock되어 있어서 waiter에 추가
 	if (lock->holder != NULL)
 	{
@@ -223,8 +225,8 @@ void lock_acquire(struct lock *lock)
 		list_insert_ordered(&lock->holder->donations, &curr->d_elem, cmp_donation_priority, NULL);
 		donate_priority();
 	}
+
 	sema_down(&lock->semaphore);
-	//
 
 	curr->wait_on_lock = NULL;
 	lock->holder = curr;
