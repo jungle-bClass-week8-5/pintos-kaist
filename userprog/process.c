@@ -240,7 +240,10 @@ int process_exec(void *f_name)
 
 	/* And then load the binary */
 	success = load(file_name, &_if);
-
+	if (!success)
+	{
+		return -1;
+	}
 	// 추가
 	argument_stack(args, count, &_if);
 
@@ -249,9 +252,10 @@ int process_exec(void *f_name)
 
 	/* If load failed, quit. */
 	palloc_free_page(file_name);
-
-	if (!success)
-		return -1;
+	// if (!success)
+	// {
+	// 	return -1;
+	// }
 
 	/* Start switched process. */
 	do_iret(&_if);
@@ -591,7 +595,6 @@ void argument_stack(char **parse, int count, struct intr_frame *_if)
 	{
 		temp += strlen(parse[i]) + 1;
 		_if->rsp -= strlen(parse[i]) + 1;
-
 		memcpy(_if->rsp, parse[i], strlen(parse[i]) + 1);
 		// 여기 보류 정확하지 않음
 		arg_address[i] = _if->rsp;

@@ -12,6 +12,7 @@
 #include "threads/synch.h"
 #include <console.h>
 #include "filesys/file.h"
+#include "include/threads/palloc.h"
 // #include "device/input.h"
 
 // 추가 : 시스템콜 전역변수 락
@@ -141,8 +142,9 @@ void syscall_handler(struct intr_frame *f)
 유저 영역을 벗어난 영역일 경우 프로세스 종료(exit(-1)) */
 void check_address(void *addr)
 {
-	if (!is_user_vaddr(addr) || pml4_get_page(thread_current()->pml4, addr) == NULL)
+	if (addr == NULL || !is_user_vaddr(addr) || pml4_get_page(thread_current()->pml4, addr) == NULL)
 	{
+		printf("2222222222\n");
 		exit(-1);
 	}
 }
@@ -188,7 +190,10 @@ int read(int fd, void *buffer, unsigned size)
 		return -1;
 	if (fd == 0) //표준 입력
 	{
-		return input_getc();
+		lock_acquire(&sys_lock);
+		int byte = input_getc();
+		lock_release(&sys_lock);
+		return byte;
 	}
 
 	lock_acquire(&sys_lock);
@@ -202,14 +207,18 @@ int write(int fd, const void *buffer, unsigned size)
 {
 	check_address(buffer);
 	if (fd >= thread_current()->next_fd)
-		return -1;
-	if (fd < 1)
 	{
 		return -1;
 	}
-	if (fd == 1)
+	else if (fd < 1)
 	{
+		return -1;
+	}
+	else if (fd == 1)
+	{
+		lock_acquire(&sys_lock);
 		putbuf(buffer, size);
+		lock_release(&sys_lock);
 		return sizeof(buffer);
 	}
 	else
@@ -274,6 +283,24 @@ pid_t fork(const char *thread_name)
 
 int exec(const char *cmd_line)
 {
+	check_address(cmd_line);
+	int file_size = strlen(cmd_line) + 1;
+	char *fn_copy = palloc_get_page(PAL_ZERO);
+
+	if (fn_copy == NULL)
+	{
+		// exit(-1);
+		return -1;
+	}
+	strlcpy(fn_copy, cmd_line, file_size); // file 이름만 복사
+	if (process_exec(fn_copy) == -1)
+	{
+		exit(-1);
+		return -1;
+	}
+
+	// NOT_REACHED();
+	// return 0;
 }
 
 int wait(pid_t pid)
