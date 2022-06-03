@@ -5,4 +5,4 @@ devices/serial.o: ../../devices/serial.c ../../include/devices/serial.h \
  ../../include/threads/synch.h ../../include/lib/kernel/list.h \
  ../../include/lib/stddef.h ../../include/devices/timer.h \
  ../../include/lib/round.h ../../include/threads/io.h \
- ../../include/threads/thread.h
+ ../../include/threads/thread.h ../../include/threads/synch.h

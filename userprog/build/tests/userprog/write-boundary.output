@@ -18,12 +18,12 @@ Executing 'write-boundary':
 (write-boundary) end
 write-boundary: exit(0)
 Execution of 'write-boundary' complete.
-Timer: 122 ticks
-Thread: 30 idle ticks, 90 kernel ticks, 2 user ticks
+Timer: 61 ticks
+Thread: 30 idle ticks, 28 kernel ticks, 3 user ticks
 hd0:0: 0 reads, 0 writes
 hd0:1: 121 reads, 257 writes
 hd1:0: 109 reads, 0 writes
-Console: 977 characters output
+Console: 976 characters output
 Keyboard: 0 keys pressed
 Exception: 0 page faults
 Powering off...

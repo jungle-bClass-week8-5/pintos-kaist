@@ -7,4 +7,5 @@ tests/threads/mlfqs/mlfqs-fair.o: ../../tests/threads/mlfqs/mlfqs-fair.c \
  ../../include/threads/malloc.h ../../include/threads/palloc.h \
  ../../include/threads/synch.h ../../include/lib/kernel/list.h \
  ../../include/threads/thread.h ../../include/threads/interrupt.h \
- ../../include/devices/timer.h ../../include/lib/round.h
+ ../../include/threads/synch.h ../../include/devices/timer.h \
+ ../../include/lib/round.h

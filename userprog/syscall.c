@@ -85,6 +85,7 @@ void syscall_handler(struct intr_frame *f)
 		break;
 	case SYS_FORK:
 		/* code */
+		memcpy(&thread_current()->parent_if, f, sizeof(struct intr_frame));
 		f->R.rax = fork(f->R.rdi);
 		break;
 	case SYS_EXEC:
@@ -158,7 +159,9 @@ void halt(void)
 
 void exit(int status)
 {
-	thread_current()->exit_status = status;
+	struct thread *curr = thread_current();
+	curr->exit_status = status;
+	printf("%s: exit(%d)\n", curr->name, status);
 	thread_exit();
 }
 
@@ -265,6 +268,8 @@ unsigned tell(int fd)
 /////////////////
 pid_t fork(const char *thread_name)
 {
+	check_address(thread_name);
+	return process_fork(thread_name, &thread_current()->parent_if);
 }
 
 int exec(const char *cmd_line)
@@ -273,4 +278,5 @@ int exec(const char *cmd_line)
 
 int wait(pid_t pid)
 {
+	return process_wait(pid);
 }

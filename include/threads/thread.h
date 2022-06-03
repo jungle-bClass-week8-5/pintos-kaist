@@ -9,6 +9,8 @@
 #include "vm/vm.h"
 #endif
 
+#include "include/threads/synch.h"
+
 /* States in a thread's life cycle. */
 enum thread_status
 {
@@ -115,11 +117,19 @@ struct thread
 	struct list_elem elem; /* List element. */
 	struct list_elem allelem;
 
-	// // 추가 syscall
+	//추가 syscall
 	int exit_status;
 
+	// syscall file descripter
 	struct file **fdt;
 	int next_fd;
+
+	// 추가 fork, wait
+	struct list child_list;
+	struct list_elem child_elem;
+	struct semaphore exit_sema;
+	struct semaphore load_sema;
+	struct semaphore fork_sema;
 
 #ifdef USERPROG
 	/* Owned by userprog/process.c. */
@@ -133,6 +143,7 @@ struct thread
 	int64_t wakeup_tick;
 	/* Owned by thread.c. */
 	// intr_frame은 실행중인 프로세스의 register 정보, stack pointer, instruction counter를 저장하는 자료구조
+	struct intr_frame parent_if;
 	struct intr_frame tf; /* Information for switching */
 	unsigned magic;				/* Detects stack overflow. */
 };

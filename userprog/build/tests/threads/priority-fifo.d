@@ -6,4 +6,5 @@ tests/threads/priority-fifo.o: ../../tests/threads/priority-fifo.c \
  ../../include/threads/init.h ../../include/devices/timer.h \
  ../../include/lib/round.h ../../include/threads/malloc.h \
  ../../include/threads/synch.h ../../include/lib/kernel/list.h \
- ../../include/threads/thread.h ../../include/threads/interrupt.h
+ ../../include/threads/thread.h ../../include/threads/interrupt.h \
+ ../../include/threads/synch.h

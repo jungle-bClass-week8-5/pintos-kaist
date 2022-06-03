@@ -241,6 +241,13 @@ tid_t thread_create(const char *name, int priority,
 	t->fdt[1] = 1;
 	t->next_fd = 2;
 
+	// 추가 : syscall fork, wait
+	sema_init(&t->fork_sema, 0);
+	sema_init(&t->load_sema, 0);
+	sema_init(&t->exit_sema, 0);
+
+	list_push_back(&thread_current()->child_list, &t->child_elem);
+
 	/* Add to run queue. */
 	thread_unblock(t);
 
@@ -520,8 +527,7 @@ init_thread(struct thread *t, const char *name, int priority)
 
 	// 추가 syscall
 	t->exit_status = 0;
-
-	// 초기화
+	list_init(&t->child_list);
 }
 
 /* Chooses and returns the next thread to be scheduled.  Should

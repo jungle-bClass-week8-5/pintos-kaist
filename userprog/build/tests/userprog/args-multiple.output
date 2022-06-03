@@ -23,12 +23,12 @@ Executing 'args-multiple some arguments for you!':
 (args) end
 args-multiple: exit(0)
 Execution of 'args-multiple' complete.
-Timer: 119 ticks
-Thread: 30 idle ticks, 88 kernel ticks, 2 user ticks
+Timer: 61 ticks
+Thread: 30 idle ticks, 28 kernel ticks, 3 user ticks
 hd0:0: 0 reads, 0 writes
 hd0:1: 80 reads, 232 writes
 hd1:0: 102 reads, 0 writes
-Console: 1076 characters output
+Console: 1075 characters output
 Keyboard: 0 keys pressed
 Exception: 0 page faults
 Powering off...
