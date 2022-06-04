@@ -16,7 +16,6 @@
 // #include "device/input.h"
 
 // 추가 : 시스템콜 전역변수 락
-static struct lock sys_lock;
 typedef int pid_t;
 
 void syscall_entry(void);
@@ -160,9 +159,10 @@ void halt(void)
 
 void exit(int status)
 {
-	struct thread *curr = thread_current();
-	curr->exit_status = status;
-	printf("%s: exit(%d)\n", curr->name, status);
+	// struct thread *curr = thread_current();
+	// curr->exit_status = status;
+	thread_current()->exit_status = status;
+	printf("%s: exit(%d)\n", thread_current()->name, status);
 	thread_exit();
 }
 
@@ -224,6 +224,7 @@ int write(int fd, const void *buffer, unsigned size)
 	else
 	{
 		struct file *write_file = process_get_file(fd);
+
 		if (write_file)
 		{
 			lock_acquire(&sys_lock);
@@ -238,7 +239,9 @@ int open(const char *file)
 {
 	// file에 대한 이름이 인자로 옴
 	check_address(file);
+
 	struct file *openfile = filesys_open(file);
+
 	if (openfile == NULL)
 		return -1;
 	return process_add_file(openfile);
@@ -256,7 +259,9 @@ void close(int fd)
 {
 	if (fd >= thread_current()->next_fd)
 		return;
+	// lock_acquire(&sys_lock);
 	process_close_file(fd);
+	// lock_release(&sys_lock);
 }
 
 void seek(int fd, unsigned position)
@@ -296,6 +301,7 @@ int exec(const char *cmd_line)
 		return -1;
 	}
 	strlcpy(fn_copy, cmd_line, file_size); // file 이름만 복사
+
 	if (process_exec(fn_copy) == -1)
 	{
 		exit(-1);

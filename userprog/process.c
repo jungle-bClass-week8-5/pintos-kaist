@@ -18,6 +18,7 @@
 #include "threads/mmu.h"
 #include "threads/vaddr.h"
 #include "intrinsic.h"
+#include "userprog/syscall.h"
 #ifdef VM
 #include "vm/vm.h"
 #endif
@@ -27,6 +28,7 @@ static bool load(const char *file_name, struct intr_frame *if_);
 static void initd(void *f_name);
 static void __do_fork(void *);
 struct thread *get_child_process(int pid);
+struct lock file_lock;
 
 /* General process initializer for initd and other process. */
 static void process_init(void)
@@ -295,8 +297,10 @@ void process_exit(void)
 {
 	struct thread *curr = thread_current();
 	struct file **fdt = curr->fdt;
+
 	for (int i = 2; i < curr->next_fd; i++)
 	{
+		// process_close_file(i);
 		if (fdt[i])
 		{
 			file_close(fdt[i]);
@@ -304,8 +308,7 @@ void process_exit(void)
 		}
 	}
 	// file deny 추가
-	// file_allow_write(curr->run_file);
-	// file_close(curr->run_file);
+	file_close(curr->run_file);
 
 	/* TODO: Your code goes here.
 	 * TODO: Implement process termination message (see
@@ -450,12 +453,18 @@ load(const char *file_name, struct intr_frame *if_)
 	// 	goto done;
 	// }
 	/*수정*/
+	// lock_acquire(&sys_lock);
 	file = filesys_open(file_name);
+
 	if (file == NULL)
 	{
 		printf("load: %s: open failed\n", file_name);
+		file_close(file);
 		goto done;
 	}
+	file_deny_write(file);
+	t->run_file = file;
+	// lock_release(&sys_lock);
 
 	/* Read and verify executable header. */
 	if (file_read(file, &ehdr, sizeof ehdr) != sizeof ehdr || memcmp(ehdr.e_ident, "\177ELF\2\1\1", 7) || ehdr.e_type != 2 || ehdr.e_machine != 0x3E // amd64
@@ -529,17 +538,17 @@ load(const char *file_name, struct intr_frame *if_)
 
 	/* Start address. */
 	if_->rip = ehdr.e_entry;
+	// 추가 deny
 
 	/* TODO: Your code goes here.
 	 * TODO: Implement argument passing (see project2/argument_passing.html). */
 	// 열린 파일에 대한 쓰기 방지
-	file_deny_write(file);
-	t->run_file = file;
+
 	success = true;
 
 done:
 	/* We arrive here whether the load is successful or not. */
-	file_close(file);
+	// file_close(file);
 	return success;
 }
 
@@ -653,8 +662,11 @@ struct file *process_get_file(int fd)
 void process_close_file(int fd)
 {
 	struct thread *curr = thread_current();
-	file_close(curr->fdt[fd]);
-	curr->fdt[fd] = NULL;
+	if (fd > 1)
+	{
+		file_close(curr->fdt[fd]);
+		curr->fdt[fd] = NULL;
+	}
 }
 
 struct thread *get_child_process(int pid)
