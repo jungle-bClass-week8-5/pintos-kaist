@@ -17,7 +17,6 @@
 
 // 추가 : 시스템콜 전역변수 락
 static struct lock sys_lock;
-static bool use_sys_lock;
 typedef int pid_t;
 
 void syscall_entry(void);
@@ -63,7 +62,7 @@ void syscall_init(void)
 }
 
 /* The main system call interface */
-void syscall_handler(struct intr_frame *f)
+void syscall_handler(struct intr_frame *f UNUSED)
 {
 	/*
  인자 들어오는 순서:
@@ -75,7 +74,7 @@ void syscall_handler(struct intr_frame *f)
  6번째 인자: %r9
  */
 	// TODO: Your implementation goes here.
-
+	check_address(f->rsp);
 	switch (f->R.rax)
 	{
 	case SYS_HALT:
@@ -132,7 +131,8 @@ void syscall_handler(struct intr_frame *f)
 		break;
 
 	default:
-		thread_exit();
+		exit(-1);
+		// thread_exit();
 		break;
 	}
 	// printf("system call!\n");
@@ -142,9 +142,8 @@ void syscall_handler(struct intr_frame *f)
 유저 영역을 벗어난 영역일 경우 프로세스 종료(exit(-1)) */
 void check_address(void *addr)
 {
-	if (addr == NULL || !is_user_vaddr(addr) || pml4_get_page(thread_current()->pml4, addr) == NULL)
+	if (addr == NULL || is_kernel_vaddr(addr) || pml4_get_page(thread_current()->pml4, addr) == NULL)
 	{
-		printf("2222222222\n");
 		exit(-1);
 	}
 }
@@ -206,6 +205,7 @@ int read(int fd, void *buffer, unsigned size)
 int write(int fd, const void *buffer, unsigned size)
 {
 	check_address(buffer);
+
 	if (fd >= thread_current()->next_fd)
 	{
 		return -1;
@@ -219,15 +219,18 @@ int write(int fd, const void *buffer, unsigned size)
 		lock_acquire(&sys_lock);
 		putbuf(buffer, size);
 		lock_release(&sys_lock);
-		return sizeof(buffer);
+		return size;
 	}
 	else
 	{
-		lock_acquire(&sys_lock);
 		struct file *write_file = process_get_file(fd);
-
-		lock_release(&sys_lock);
-		return file_write(write_file, buffer, size);
+		if (write_file)
+		{
+			lock_acquire(&sys_lock);
+			int write_byte = file_write(write_file, buffer, size);
+			lock_release(&sys_lock);
+			return write_byte;
+		}
 	}
 }
 // file을 열고 성공하면 fd를 반환 하고 실패하면 -1을 반환

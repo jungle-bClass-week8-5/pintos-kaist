@@ -130,6 +130,7 @@ struct thread
 	struct semaphore exit_sema;
 	struct semaphore load_sema;
 	struct semaphore fork_sema;
+	struct file *run_file;
 
 #ifdef USERPROG
 	/* Owned by userprog/process.c. */

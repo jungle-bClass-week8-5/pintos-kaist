@@ -231,6 +231,7 @@ int process_exec(void *f_name)
 	char *args[128];
 	int count = 0;
 	char *token, *save_ptr;
+
 	for (token = strtok_r(file_name, " ", &save_ptr); token != NULL; token = strtok_r(NULL, " ", &save_ptr))
 	{
 		args[count] = token;
@@ -240,6 +241,7 @@ int process_exec(void *f_name)
 
 	/* And then load the binary */
 	success = load(file_name, &_if);
+
 	if (!success)
 	{
 		return -1;
@@ -247,11 +249,12 @@ int process_exec(void *f_name)
 	// 추가
 	argument_stack(args, count, &_if);
 
+	palloc_free_page(file_name);
 	// 테스트용
 	// hex_dump(_if.rsp, _if.rsp, USER_STACK - _if.rsp, true);
 
 	/* If load failed, quit. */
-	palloc_free_page(file_name);
+
 	// if (!success)
 	// {
 	// 	return -1;
@@ -300,11 +303,9 @@ void process_exit(void)
 			fdt[i] = NULL; //????? 왜 NULL을 넣지?
 		}
 	}
-
-	// for (int i = curr->next_fd - 1; i > 2; i--)
-	// {
-	// 	process_close_file(i);
-	// }
+	// file deny 추가
+	// file_allow_write(curr->run_file);
+	// file_close(curr->run_file);
 
 	/* TODO: Your code goes here.
 	 * TODO: Implement process termination message (see
@@ -531,7 +532,9 @@ load(const char *file_name, struct intr_frame *if_)
 
 	/* TODO: Your code goes here.
 	 * TODO: Implement argument passing (see project2/argument_passing.html). */
-
+	// 열린 파일에 대한 쓰기 방지
+	file_deny_write(file);
+	t->run_file = file;
 	success = true;
 
 done:

@@ -527,6 +527,7 @@ init_thread(struct thread *t, const char *name, int priority)
 
 	// 추가 syscall
 	t->exit_status = 0;
+	// t->run_file = NULL;
 	list_init(&t->child_list);
 }
 
