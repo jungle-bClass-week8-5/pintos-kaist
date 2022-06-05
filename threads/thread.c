@@ -237,6 +237,10 @@ tid_t thread_create(const char *name, int priority,
 
 	// 추가: syscall
 	t->fdt = palloc_get_multiple(PAL_ZERO, 3);
+	if (t->fdt == NULL)
+	{
+		return TID_ERROR;
+	}
 	t->fdt[0] = 0;
 	t->fdt[1] = 1;
 	t->next_fd = 2;
@@ -841,30 +845,16 @@ bool cmp_priority(const struct list_elem *a, const struct list_elem *b, void *au
 // 우선순위가 높은 thread의 우선순위를 lock에 있는 thread들에게 기부
 void donate_priority()
 {
-	int depth;
-	// struct thread *cur = thread_current();
-
-	// for (depth = 0; depth < 8; depth++)
-	// {
-	// 	if (!cur->wait_on_lock) // 기다리는 lock이 없다면 종료
-	// 		break;
-	// 	struct thread *holder = cur->wait_on_lock->holder;
-	// 	holder->priority = cur->priority;
-	// 	cur = holder;
-	// }
-	struct thread *curr = thread_current();
-	// // lock을 잠군 thread
-	// struct lock *lock_t = curr->wait_on_lock;
-	struct lock *lock_t = curr->wait_on_lock;
-	int i = 0;
-	while (lock_t && i < 8)
+	struct thread *t = thread_current();
+	struct lock *lock = t->wait_on_lock;
+	int depth = 0;
+	while (lock && depth < 8)
 	{
-		if (lock_t && curr->priority > lock_t->holder->priority)
-		{
-			lock_t->holder->priority = curr->priority;
-			lock_t = lock_t->holder->wait_on_lock;
-			i++;
-		}
+		if (!lock->holder)
+			return;
+		lock->holder->priority = t->priority;
+		lock = lock->holder->wait_on_lock;
+		depth++;
 	}
 }
 // 추가 : 나이스

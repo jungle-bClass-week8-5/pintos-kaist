@@ -89,7 +89,8 @@ void syscall_handler(struct intr_frame *f UNUSED)
 		break;
 	case SYS_EXEC:
 		/* code */
-		f->R.rax = exec(f->R.rdi);
+		// f->R.rax = exec(f->R.rdi);
+		exec(f->R.rdi);
 		break;
 	case SYS_WAIT:
 		/* code */
@@ -197,6 +198,11 @@ int read(int fd, void *buffer, unsigned size)
 
 	lock_acquire(&sys_lock);
 	struct file *read_file = process_get_file(fd);
+	if (read_file == NULL)
+	{
+		lock_release(&sys_lock);
+		return -1;
+	}
 	int _size = file_read(read_file, buffer, size);
 	lock_release(&sys_lock);
 	return _size;
@@ -237,14 +243,22 @@ int write(int fd, const void *buffer, unsigned size)
 // file을 열고 성공하면 fd를 반환 하고 실패하면 -1을 반환
 int open(const char *file)
 {
-	// file에 대한 이름이 인자로 옴
+	// // file에 대한 이름이 인자로 옴
 	check_address(file);
-
+	// lock_acquire(&sys_lock);
 	struct file *openfile = filesys_open(file);
-
+	// lock_release(&sys_lock);
 	if (openfile == NULL)
+	{
 		return -1;
-	return process_add_file(openfile);
+	}
+	int fd = process_add_file(openfile);
+	// if (process_get_file(fd) == NULL)
+	// {
+	// 	file_close(openfile);
+	// 	return -1;
+	// }
+	return fd;
 }
 
 int filesize(int fd)
@@ -257,11 +271,23 @@ int filesize(int fd)
 
 void close(int fd)
 {
+	// struct file *file = thread_current()->fdt[fd];
+	// if (file)
+	// {
+	// 	lock_acquire(&sys_lock);
+	// 	thread_current()->fdt[fd] = NULL;
+	// 	file_close(file);
+	// 	lock_release(&sys_lock);
+	// }
+	if (fd < 2)
+	{
+		return;
+	}
 	if (fd >= thread_current()->next_fd)
 		return;
-	// lock_acquire(&sys_lock);
+	lock_acquire(&sys_lock);
 	process_close_file(fd);
-	// lock_release(&sys_lock);
+	lock_release(&sys_lock);
 }
 
 void seek(int fd, unsigned position)
@@ -301,8 +327,8 @@ int exec(const char *cmd_line)
 		return -1;
 	}
 	strlcpy(fn_copy, cmd_line, file_size); // file 이름만 복사
-
-	if (process_exec(fn_copy) == -1)
+	int temp = process_exec(fn_copy);
+	if (temp == -1)
 	{
 		exit(-1);
 		return -1;

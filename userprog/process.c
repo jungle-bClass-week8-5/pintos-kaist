@@ -46,7 +46,7 @@ tid_t process_create_initd(const char *file_name)
 {
 	char *fn_copy;
 	tid_t tid;
-
+	lock_init(&file_lock);
 	/* Make a copy of FILE_NAME.
 	 * Otherwise there's a race between the caller and load(). */
 	fn_copy = palloc_get_page(0);
@@ -242,7 +242,7 @@ int process_exec(void *f_name)
 	///////////////////////////
 
 	/* And then load the binary */
-	success = load(file_name, &_if);
+	success = load(args[0], &_if);
 
 	if (!success)
 	{
@@ -263,6 +263,7 @@ int process_exec(void *f_name)
 	// }
 
 	/* Start switched process. */
+
 	do_iret(&_if);
 	NOT_REACHED();
 }
@@ -298,17 +299,19 @@ void process_exit(void)
 	struct thread *curr = thread_current();
 	struct file **fdt = curr->fdt;
 
-	for (int i = 2; i < curr->next_fd; i++)
+	if (curr->run_file)
+		file_close(curr->run_file);
+
+	for (int i = 2; i < 128; i++)
 	{
 		// process_close_file(i);
-		if (fdt[i])
+		if (fdt[i] != NULL)
 		{
 			file_close(fdt[i]);
 			fdt[i] = NULL; //????? 왜 NULL을 넣지?
 		}
 	}
 	// file deny 추가
-	file_close(curr->run_file);
 
 	/* TODO: Your code goes here.
 	 * TODO: Implement process termination message (see
@@ -453,18 +456,17 @@ load(const char *file_name, struct intr_frame *if_)
 	// 	goto done;
 	// }
 	/*수정*/
-	// lock_acquire(&sys_lock);
+	lock_acquire(&file_lock);
 	file = filesys_open(file_name);
-
 	if (file == NULL)
 	{
+		lock_release(&file_lock);
 		printf("load: %s: open failed\n", file_name);
-		file_close(file);
 		goto done;
 	}
+	lock_release(&file_lock);
 	file_deny_write(file);
 	t->run_file = file;
-	// lock_release(&sys_lock);
 
 	/* Read and verify executable header. */
 	if (file_read(file, &ehdr, sizeof ehdr) != sizeof ehdr || memcmp(ehdr.e_ident, "\177ELF\2\1\1", 7) || ehdr.e_type != 2 || ehdr.e_machine != 0x3E // amd64
@@ -642,6 +644,9 @@ int process_add_file(struct file *f)
 // 프로세스의 파일 디스크립터 테이블을 검색하여 파일 객체의 주소를 리턴
 {
 	struct thread *curr = thread_current();
+	// printf("sizse: %d\n", sizeof(curr->fdt[1]));
+	// if (curr->next_fd > 1024)
+	// 	return -1;
 	curr->fdt[curr->next_fd] = f;
 	curr->next_fd++;
 	return curr->next_fd - 1;
