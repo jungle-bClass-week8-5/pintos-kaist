@@ -244,21 +244,34 @@ int write(int fd, const void *buffer, unsigned size)
 int open(const char *file)
 {
 	// // file에 대한 이름이 인자로 옴
-	check_address(file);
-	// lock_acquire(&sys_lock);
-	struct file *openfile = filesys_open(file);
-	// lock_release(&sys_lock);
-	if (openfile == NULL)
-	{
-		return -1;
-	}
-	int fd = process_add_file(openfile);
-	// if (process_get_file(fd) == NULL)
+	// check_address(file);
+	// // lock_acquire(&sys_lock);
+	// struct file *openfile = filesys_open(file);
+	// // lock_release(&sys_lock);
+	// if (openfile == NULL)
 	// {
-	// 	file_close(openfile);
 	// 	return -1;
 	// }
-	return fd;
+	// int fd = process_add_file(openfile);
+
+	// return fd;
+	check_address(file);
+	struct thread *cur = thread_current();
+	struct file *fd = filesys_open(file);
+	if (fd)
+	{
+		for (int i = 2; i < 128; i++)
+		{
+			if (!cur->fdt[i])
+			{
+				cur->fdt[i] = fd;
+				cur->next_fd = i + 1;
+				return i;
+			}
+		}
+		file_close(fd);
+	}
+	return -1;
 }
 
 int filesize(int fd)

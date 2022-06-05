@@ -236,7 +236,8 @@ tid_t thread_create(const char *name, int priority,
 	t->tf.eflags = FLAG_IF;
 
 	// 추가: syscall
-	t->fdt = palloc_get_multiple(PAL_ZERO, 3);
+	// t->fdt = palloc_get_multiple(PAL_ZERO, 3);
+	t->fdt = palloc_get_page(PAL_ZERO);
 	if (t->fdt == NULL)
 	{
 		return TID_ERROR;

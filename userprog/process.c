@@ -324,6 +324,7 @@ void process_exit(void)
 	sema_down(&curr->exit_sema);
 
 	palloc_free_page(fdt);
+	// palloc_free_multiple(fdt, 3);
 	process_cleanup();
 }
 
@@ -645,7 +646,7 @@ int process_add_file(struct file *f)
 {
 	struct thread *curr = thread_current();
 	// printf("sizse: %d\n", sizeof(curr->fdt[1]));
-	// if (curr->next_fd > 1024)
+	// if (curr->next_fd > 128)
 	// 	return -1;
 	curr->fdt[curr->next_fd] = f;
 	curr->next_fd++;
