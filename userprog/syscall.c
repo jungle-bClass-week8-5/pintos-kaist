@@ -131,7 +131,7 @@ void syscall_handler(struct intr_frame *f UNUSED)
 		break;
 
 	default:
-		exit(-1);
+		// exit(-1);
 		// thread_exit();
 		break;
 	}
@@ -169,14 +169,12 @@ void exit(int status)
 
 bool create(const char *file, unsigned initial_size)
 {
-	// printf("process create \n");
 	check_address(file);
 	return filesys_create(file, initial_size);
 }
 
 bool remove(const char *file)
 {
-	// printf("procces remove\n");
 	check_address(file);
 	return filesys_remove(file);
 }
@@ -243,18 +241,7 @@ int write(int fd, const void *buffer, unsigned size)
 // file을 열고 성공하면 fd를 반환 하고 실패하면 -1을 반환
 int open(const char *file)
 {
-	// // file에 대한 이름이 인자로 옴
-	// check_address(file);
-	// // lock_acquire(&sys_lock);
-	// struct file *openfile = filesys_open(file);
-	// // lock_release(&sys_lock);
-	// if (openfile == NULL)
-	// {
-	// 	return -1;
-	// }
-	// int fd = process_add_file(openfile);
 
-	// return fd;
 	check_address(file);
 	struct thread *cur = thread_current();
 	struct file *fd = filesys_open(file);
@@ -284,14 +271,6 @@ int filesize(int fd)
 
 void close(int fd)
 {
-	// struct file *file = thread_current()->fdt[fd];
-	// if (file)
-	// {
-	// 	lock_acquire(&sys_lock);
-	// 	thread_current()->fdt[fd] = NULL;
-	// 	file_close(file);
-	// 	lock_release(&sys_lock);
-	// }
 	if (fd < 2)
 	{
 		return;
@@ -336,7 +315,6 @@ int exec(const char *cmd_line)
 
 	if (fn_copy == NULL)
 	{
-		// exit(-1);
 		return -1;
 	}
 	strlcpy(fn_copy, cmd_line, file_size); // file 이름만 복사
@@ -346,9 +324,6 @@ int exec(const char *cmd_line)
 		exit(-1);
 		return -1;
 	}
-
-	// NOT_REACHED();
-	// return 0;
 }
 
 int wait(pid_t pid)
